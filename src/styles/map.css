@@ -1,0 +1,229 @@
+.map-shell {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--rose-50);
+  isolation: isolate;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+  background: #f4eef1;
+  font-family: var(--font-sans);
+}
+
+.map-controls {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 500;
+}
+
+.map-controls .segmented {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+}
+
+.map-legend {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 500;
+  display: flex;
+  gap: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+  font-size: 12.5px;
+  font-weight: 550;
+  color: var(--ink-700);
+}
+
+.map-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Marcadores */
+.map-marker {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  --c: var(--good);
+}
+
+.map-marker--atencao {
+  --c: var(--warn);
+}
+
+.map-marker--offline {
+  --c: var(--offline);
+}
+
+.map-marker-dot {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--c);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s var(--ease);
+}
+
+.map-marker--atencao .map-marker-dot {
+  border-radius: 9px;
+  transform: rotate(45deg);
+}
+
+.map-marker--atencao .map-marker-dot svg {
+  transform: rotate(-45deg);
+  color: #3d2a00;
+}
+
+.map-marker--offline .map-marker-dot {
+  background: #fff;
+  color: var(--offline);
+  border-color: var(--offline);
+  border-style: dashed;
+}
+
+.map-marker:hover .map-marker-dot,
+.map-marker.is-selected .map-marker-dot {
+  transform: scale(1.15);
+}
+
+.map-marker--atencao:hover .map-marker-dot,
+.map-marker--atencao.is-selected .map-marker-dot {
+  transform: rotate(45deg) scale(1.15);
+}
+
+.map-marker.is-selected::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--wine-500);
+  animation: fadeIn 0.3s ease;
+}
+
+.map-marker-pulse {
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: var(--c);
+  animation: pulseRing 2s var(--ease) infinite;
+}
+
+.map-marker-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -4px);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-800);
+  background: #fff;
+  padding: 1px 7px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+
+.map-marker.mini {
+  width: 14px;
+  height: 14px;
+}
+
+.map-marker.mini .map-marker-dot {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  box-shadow: none;
+}
+
+.map-marker--atencao.mini .map-marker-dot {
+  border-radius: 3px;
+  width: 12px;
+  height: 12px;
+}
+
+.block-label {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 999px !important;
+  padding: 2px 9px !important;
+  font-size: 11px !important;
+  font-weight: 600;
+  color: var(--wine-700) !important;
+}
+
+.block-label::before {
+  display: none;
+}
+
+.sensor-popup .leaflet-popup-content-wrapper {
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  padding: 0;
+}
+
+.sensor-popup .leaflet-popup-content {
+  margin: 0;
+  width: 260px !important;
+}
+
+.popup {
+  padding: 16px;
+  font-family: var(--font-sans);
+}
+
+.popup strong {
+  font-size: 14.5px;
+  color: var(--ink-900);
+}
+
+.popup dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 12px;
+  margin: 12px 0;
+  font-size: 12.5px;
+}
+
+.popup dt {
+  color: var(--ink-500);
+}
+
+.popup dd {
+  margin: 0;
+  color: var(--ink-800);
+  font-weight: 500;
+}
+
+.leaflet-container a.link {
+  color: var(--wine-600);
+}
+
+@media (max-width: 640px) {
+  .map-shell {
+    height: 380px !important;
+  }
+  .map-legend {
+    gap: 10px;
+    padding: 6px 10px;
+    font-size: 11.5px;
+  }
+}
