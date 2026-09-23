@@ -140,7 +140,8 @@ export default function Login() {
             </form>
           )}
 
-          {!isApiMode && (
+          {/* Os mesmos usuários de demonstração são criados pela API (SEED_DEMO=true). */}
+          {(
             <div className="demo-access">
               <div className="field-label">Acesso de demonstração</div>
               <div className="demo-users">
