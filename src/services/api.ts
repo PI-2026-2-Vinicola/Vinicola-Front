@@ -28,7 +28,9 @@ async function http<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
   if (!res.ok) {
     const detail = await res.json().catch(() => ({}));
-    throw new Error((detail as { detail?: string }).detail ?? `Erro ${res.status}`);
+    const err = new Error((detail as { detail?: string }).detail ?? `Erro ${res.status}`) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
   }
   return res.json() as Promise<T>;
 }
@@ -37,10 +39,21 @@ export type DataSource = 'demo' | 'api';
 
 export async function loadData(): Promise<DemoData & { source: DataSource }> {
   if (isApiMode) {
-    const [sensors, readings] = await Promise.all([http<Sensor[]>('/sensors'), http<Reading[]>('/readings?limit=5000')]);
-    return { sensors, readings, source: 'api' };
+    try {
+      const [sensors, readings] = await Promise.all([http<Sensor[]>('/sensors'), http<Reading[]>('/readings?days=31&limit=10000')]);
+      return { sensors, readings, source: 'api' };
+    } catch (e) {
+      // API com leitura restrita (PUBLIC_READ=false): sem login, os dados ficam vazios até autenticar.
+      if ((e as { status?: number }).status === 401) return { sensors: [], readings: [], source: 'api' };
+      throw e;
+    }
   }
   return { ...generateDemoData(new Date()), source: 'demo' };
+}
+
+/** Pede à API uma leitura simulada do sensor (demonstração do pipeline sem hardware). */
+export async function simulateRemote(sensorId: string): Promise<Reading> {
+  return http<Reading>(`/simulate/${encodeURIComponent(sensorId)}`, { method: 'POST' });
 }
 
 /** Envia uma imagem para o endpoint de ingestão (mesmo fluxo usado pelo ESP32/edge). */

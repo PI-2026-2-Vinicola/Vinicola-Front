@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Reading, Sensor } from '../data/types';
 import { VARIETIES } from '../data/varieties';
-import { loadData, type DataSource } from '../services/api';
+import { isApiMode, loadData, type DataSource } from '../services/api';
+import { useAuth } from './AuthContext';
 
 interface SensorStats {
   analyses: number;
@@ -31,9 +32,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(() => new Date());
+  const { user } = useAuth();
+  // No modo API os dados são recarregados quando o usuário entra ou sai (o token muda).
+  const reloadKey = isApiMode ? (user?.email ?? 'anon') : 'demo';
 
   useEffect(() => {
     let alive = true;
+    setLoading(true);
     loadData()
       .then((d) => alive && setState(d))
       .catch((e: Error) => alive && setError(e.message))
@@ -43,7 +48,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       alive = false;
       clearInterval(t);
     };
-  }, []);
+  }, [reloadKey]);
 
   const addReading = useCallback((reading: Reading) => {
     setState((s) => ({

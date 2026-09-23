@@ -5,7 +5,7 @@ import { simulateCapture } from '../../data/generate';
 import type { PipelineStage, Reading } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
 import { formatTime } from '../../lib/format';
-import { isApiMode, resolveImageUrl, uploadImage } from '../../services/api';
+import { isApiMode, resolveImageUrl, simulateRemote, uploadImage } from '../../services/api';
 import { GrapeScene } from '../grape/GrapeScene';
 import { StageBadge } from '../ui/Badges';
 import { ReadingModal } from './ReadingModal';
@@ -65,6 +65,12 @@ export function PipelineSimulator() {
       const sensor = sensors.find((s) => s.id === (targetId ?? sensorId));
       if (!sensor || sensor.status === 'offline') return;
       setError(null);
+      if (isApiMode) {
+        simulateRemote(sensor.id)
+          .then((r) => start(r))
+          .catch((e: Error) => setError(e.message));
+        return;
+      }
       start(simulateCapture(sensor, lastSeq()));
     },
     [sensors, sensorId, lastSeq, start],
