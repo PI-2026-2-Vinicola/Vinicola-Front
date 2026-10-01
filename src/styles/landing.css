@@ -209,33 +209,6 @@
   color: var(--ink-900);
 }
 
-.float-sensor {
-  top: 42%;
-  right: -34px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12.5px;
-  animation-delay: -3s;
-}
-
-.float-sensor .kpi-icon {
-  width: 34px;
-  height: 34px;
-  margin: 0;
-  border-radius: 10px;
-}
-
-.float-sensor strong {
-  display: block;
-  font-size: 13px;
-}
-
-.float-sensor span {
-  color: var(--ink-500);
-}
-
 .float-result .result-enter {
   animation: fadeUp 0.5s var(--ease) both;
 }
@@ -352,11 +325,6 @@
     left: 8px;
     bottom: -56px;
     width: 220px;
-  }
-  .float-sensor {
-    right: 6px;
-    top: auto;
-    bottom: -40px;
   }
   .flow {
     grid-template-columns: repeat(5, minmax(84px, 1fr));

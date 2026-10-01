@@ -1,10 +1,10 @@
-import { BarChart3, Cpu, Grape, History, House, Info, LayoutDashboard, Lock, LogIn, LogOut, Menu, Plug, X } from 'lucide-react';
+import { BarChart3, Cpu, Grape, History, House, Info, LayoutDashboard, Lock, LogIn, LogOut, Menu, Settings, UserRound, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ROLE_LABEL } from '../../data/labels';
 import { initials } from '../../lib/format';
-import type { Area } from '../../services/api';
+import { homeFor, type Area } from '../../services/api';
 import { useScrolled } from '../../hooks/useScrolled';
 import { Brand } from '../ui/Logo';
 
@@ -48,7 +48,7 @@ export function Navbar() {
   return (
     <header className={`nav ${scrolled || open ? 'is-scrolled' : ''}`}>
       <div className="container nav-inner">
-        <Link to="/" aria-label="OSAIS — página inicial">
+        <Link to="/" aria-label="OASIS — página inicial">
           <Brand />
         </Link>
 
@@ -79,14 +79,15 @@ export function Navbar() {
                       {user.email} · {ROLE_LABEL[user.role]}
                     </span>
                   </div>
-                  {can('dashboard') && (
-                    <Link to="/dashboard" role="menuitem">
-                      <LayoutDashboard /> Dashboard
-                    </Link>
-                  )}
-                  {can('integracoes') && (
-                    <Link to="/integracoes" role="menuitem">
-                      <Plug /> Integrações
+                  <Link to={homeFor(user.role)} role="menuitem">
+                    <LayoutDashboard /> Abrir plataforma
+                  </Link>
+                  <Link to="/conta" role="menuitem">
+                    <UserRound /> Minha conta
+                  </Link>
+                  {can('administracao') && (
+                    <Link to="/administracao" role="menuitem">
+                      <Settings /> Administração
                     </Link>
                   )}
                   <button onClick={doLogout} role="menuitem">
@@ -123,9 +124,9 @@ export function Navbar() {
                   {locked(item.area) && <Lock className="lock" aria-label="requer acesso" />}
                 </NavLink>
               ))}
-              {can('integracoes') && (
-                <NavLink to="/integracoes">
-                  <Plug /> Integrações
+              {can('administracao') && (
+                <NavLink to="/administracao">
+                  <Settings /> Administração
                 </NavLink>
               )}
             </nav>

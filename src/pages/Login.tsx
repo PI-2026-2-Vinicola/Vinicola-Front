@@ -1,58 +1,60 @@
-import { ArrowLeft, ArrowRight, Eye, EyeOff, KeyRound, Lock, Mail, MailCheck, ShieldCheck, UserCog, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, KeyRound, Lock, Mail, ShieldCheck } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { VineyardRows } from '../components/landing/VineyardRows';
 import { Brand } from '../components/ui/Logo';
+import { errorMessage } from '../components/ui/States';
 import { useAuth } from '../context/AuthContext';
-import { ROLE_LABEL } from '../data/labels';
 import type { Role } from '../data/types';
-import { ACCESS, DEMO_PASSWORD, DEMO_USERS, isApiMode, requestPasswordReset } from '../services/api';
+import { ACCESS, homeFor, type Area } from '../services/api';
+import { ApiError } from '../services/http';
 
-const ROLE_ICON: Record<Role, typeof Users> = { admin: ShieldCheck, gestor: UserCog, operador: Users };
+const AREA_BY_PATH: Record<string, Area> = {
+  dashboard: 'dashboard',
+  sensores: 'sensores',
+  analises: 'analises',
+  classificacao: 'classificacao',
+  historico: 'historico',
+  importacao: 'importacao',
+  administracao: 'administracao',
+};
 
-function landingFor(role: Role, from?: string) {
-  const area = from?.split('/')[1];
-  const map: Record<string, keyof typeof ACCESS> = { dashboard: 'dashboard', sensores: 'sensores', analises: 'analises', historico: 'historico', integracoes: 'integracoes' };
-  if (from && (!map[area ?? ''] || ACCESS[map[area!]].includes(role)) && from !== '/login') return from;
-  return ACCESS.dashboard.includes(role) ? '/dashboard' : '/analises';
+/** Volta para a página que pediu login, se o perfil tiver acesso a ela. */
+function destination(role: Role, from?: string) {
+  if (!from || from.startsWith('/login')) return homeFor(role);
+  const area = AREA_BY_PATH[from.split('/')[1]?.split('?')[0] ?? ''];
+  if (area && !(ACCESS[area] as readonly string[]).includes(role)) return homeFor(role);
+  return from;
 }
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, status, user, notice } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from;
-  const [mode, setMode] = useState<'login' | 'recover' | 'sent'>('login');
+  const [mode, setMode] = useState<'login' | 'recover'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  if (status === 'authenticated' && user) return <Navigate to={destination(user.role, from)} replace />;
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError('Informe um e-mail válido.');
+    if (!password) return setError('Informe a senha.');
     setError(null);
     setBusy(true);
     try {
-      if (mode === 'login') {
-        const u = await login(email, password);
-        navigate(landingFor(u.role, from), { replace: true });
-      } else {
-        await requestPasswordReset(email);
-        setMode('sent');
-      }
+      const u = await login(email, password);
+      navigate(destination(u.role, from), { replace: true });
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof ApiError && err.status === 401 ? 'E-mail ou senha inválidos.' : errorMessage(err));
     } finally {
       setBusy(false);
     }
-  };
-
-  const quick = (em: string) => {
-    setEmail(em);
-    setPassword(DEMO_PASSWORD);
-    setMode('login');
-    setError(null);
   };
 
   return (
@@ -60,108 +62,88 @@ export default function Login() {
       <VineyardRows className="hero-rows" />
       <div className="container login-grid">
         <div className="login-aside">
-          <span className="eyebrow">Plataforma OSAIS</span>
-          <h1 className="display">Bem-vindo de volta ao vinhedo.</h1>
-          <p>Acompanhe sensores, imagens analisadas pela IA e a evolução da qualidade das uvas em tempo real.</p>
+          <span className="eyebrow">Plataforma OASIS</span>
+          <h1 className="display">Do campo aos dados.</h1>
+          <p>Sensores, imagens analisadas e indicadores de qualidade das uvas em um só lugar.</p>
           <ul className="login-perks">
             <li>
               <ShieldCheck /> Perfis de acesso: Administrador, Gestor e Operador
             </li>
             <li>
-              <KeyRound /> Sessão protegida por token (JWT na API)
+              <KeyRound /> Sessão com expiração e bloqueio após tentativas inválidas
             </li>
           </ul>
         </div>
 
         <div className="login-card">
-          <Brand light={false} />
-          {mode === 'sent' ? (
-            <div className="login-sent">
-              <div className="kpi-icon" style={{ background: 'var(--good-bg)', color: 'var(--good-ink)' }}>
-                <MailCheck />
+          <Brand />
+          {mode === 'recover' ? (
+            <div className="login-form">
+              <div>
+                <h2>Esqueceu a senha?</h2>
+                <p className="muted small" style={{ marginTop: 6 }}>
+                  Por segurança, a redefinição é feita por um administrador da OASIS em <strong>Administração → Usuários</strong>, que define uma senha provisória para você trocar em <strong>Minha conta</strong>.
+                </p>
+                <p className="muted small" style={{ marginTop: 10 }}>
+                  Se você é o único administrador, redefina pelo servidor da API: <code>python -m app.cli reset-password --email seu@email</code>
+                </p>
               </div>
-              <h2>Verifique seu e-mail</h2>
-              <p className="muted">
-                Se <strong>{email}</strong> estiver cadastrado, você receberá um link para redefinir a senha{isApiMode ? '' : ' (simulado no modo demonstração)'}.
-              </p>
-              <button className="btn btn-secondary" onClick={() => setMode('login')}>
+              <button type="button" className="btn btn-secondary" onClick={() => setMode('login')}>
                 <ArrowLeft /> Voltar ao login
               </button>
             </div>
           ) : (
             <form onSubmit={submit} className="login-form" noValidate>
               <div>
-                <h2>{mode === 'login' ? 'Entrar' : 'Recuperar senha'}</h2>
-                <p className="muted" style={{ fontSize: 14.5, marginTop: 4 }}>
-                  {mode === 'login' ? 'Use seu e-mail corporativo para acessar a plataforma.' : 'Informe seu e-mail e enviaremos as instruções.'}
+                <h2>Entrar</h2>
+                <p className="muted small" style={{ marginTop: 4 }}>
+                  Use o e-mail cadastrado pelo administrador.
                 </p>
               </div>
+              {notice && !error && (
+                <div className="form-info" role="status">
+                  {notice}
+                </div>
+              )}
               <div className="field">
                 <label htmlFor="email">E-mail</label>
                 <div className="input-icon">
                   <Mail />
-                  <input id="email" className="input" type="email" autoComplete="email" placeholder="voce@osais.agr.br" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <input id="email" className="input" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
               </div>
-              {mode === 'login' && (
-                <div className="field">
-                  <label htmlFor="password">Senha</label>
-                  <div className="input-icon">
-                    <Lock />
-                    <input
-                      id="password"
-                      className="input"
-                      type={show ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      style={{ paddingRight: 44 }}
-                    />
-                    <button type="button" className="icon-btn pwd-toggle" onClick={() => setShow((s) => !s)} aria-label={show ? 'Ocultar senha' : 'Mostrar senha'}>
-                      {show ? <EyeOff /> : <Eye />}
-                    </button>
-                  </div>
+              <div className="field">
+                <label htmlFor="password">Senha</label>
+                <div className="input-icon">
+                  <Lock />
+                  <input
+                    id="password"
+                    className="input"
+                    type={show ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    style={{ paddingRight: 44 }}
+                  />
+                  <button type="button" className="icon-btn pwd-toggle" onClick={() => setShow((s) => !s)} aria-label={show ? 'Ocultar senha' : 'Mostrar senha'}>
+                    {show ? <EyeOff /> : <Eye />}
+                  </button>
                 </div>
-              )}
+              </div>
               {error && (
                 <div className="form-error" role="alert">
                   {error}
                 </div>
               )}
               <button className="btn btn-primary btn-lg" type="submit" disabled={busy}>
-                {busy ? <span className="spinner" /> : mode === 'login' ? 'Entrar' : 'Enviar instruções'}
-                {!busy && <ArrowRight className="arrow" />}
+                {busy ? <span className="spinner" /> : 'Entrar'}
+                {!busy && <ArrowRight />}
               </button>
-              <button type="button" className="btn btn-ghost" onClick={() => (setMode(mode === 'login' ? 'recover' : 'login'), setError(null))}>
-                {mode === 'login' ? 'Recuperar senha' : 'Voltar ao login'}
+              <button type="button" className="btn btn-ghost" onClick={() => (setMode('recover'), setError(null))}>
+                Esqueci minha senha
               </button>
             </form>
-          )}
-
-          {/* Os mesmos usuários de demonstração são criados pela API (SEED_DEMO=true). */}
-          {(
-            <div className="demo-access">
-              <div className="field-label">Acesso de demonstração</div>
-              <div className="demo-users">
-                {DEMO_USERS.map((u) => {
-                  const Icon = ROLE_ICON[u.role];
-                  return (
-                    <button key={u.email} type="button" className={`demo-user ${email === u.email ? 'is-active' : ''}`} onClick={() => quick(u.email)}>
-                      <Icon />
-                      <span>
-                        <strong>{ROLE_LABEL[u.role]}</strong>
-                        <small>{u.description}</small>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="muted" style={{ fontSize: 12.5 }}>
-                Senha para todos os perfis: <code>{DEMO_PASSWORD}</code>
-              </p>
-            </div>
           )}
           <Link to="/" className="link" style={{ justifyContent: 'center', marginTop: 4 }}>
             <ArrowLeft /> Voltar ao início

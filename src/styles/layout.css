@@ -456,29 +456,6 @@
   padding: 16px 20px;
 }
 
-.toolbar-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.toolbar-label {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-500);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.toolbar-label svg {
-  width: 14px;
-  height: 14px;
-}
-
 /* ---------- Footer ---------- */
 .footer {
   position: relative;
@@ -561,23 +538,6 @@
 }
 
 /* Faixa de modo demonstração */
-.demo-ribbon {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: 12.5px;
-  font-weight: 550;
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-.demo-ribbon .badge-dot {
-  color: #7ee2a8;
-}
 
 .restricted {
   max-width: 560px;

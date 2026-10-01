@@ -1,14 +1,13 @@
 import type { Reading } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
 import { formatDateTime, formatRelative } from '../../lib/format';
-import { resolveImageUrl } from '../../services/api';
-import { GrapeScene } from '../grape/GrapeScene';
+import { ReadingImage } from '../reading/ReadingImage';
 import { QualityBadge } from '../ui/Badges';
 
 export function ReadingThumb({ reading }: { reading: Reading }) {
   return (
     <div className="list-thumb">
-      <GrapeScene className="scene" seed={reading.imageSeed} varietyId={reading.varietyId} detections={reading.detections} imageUrl={resolveImageUrl(reading)} showBoxes={false} />
+      <ReadingImage reading={reading} thumb />
     </div>
   );
 }
@@ -18,7 +17,7 @@ export function ReadingListItem({ reading, onOpen, relative = true }: { reading:
     <button className="list-item" onClick={() => onOpen(reading)}>
       <ReadingThumb reading={reading} />
       <div className="list-body">
-        <strong>{VARIETY_BY_ID[reading.varietyId].name}</strong>
+        <strong>{VARIETY_BY_ID[reading.varietyId]?.name ?? reading.varietyId}</strong>
         <span>
           {reading.sensorId} · {reading.visualCondition}
         </span>

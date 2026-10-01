@@ -1,12 +1,12 @@
-import { CircleCheck, Cpu, ImageDown, ScanSearch, Sparkles, Wifi } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { useData } from '../../context/DataContext';
+import { CircleCheck, Cpu, ImageDown, ScanSearch, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { MATURATION_LABEL, STAGE_LABEL } from '../../data/labels';
 import type { PipelineStage } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
 import { formatPct } from '../../lib/format';
 import { GrapeScene } from '../grape/GrapeScene';
 import { QualityBadge } from '../ui/Badges';
+import { EXAMPLES } from './examples';
 
 const STAGES: { key: PipelineStage; icon: typeof Cpu; ms: number }[] = [
   { key: 'recebida', icon: ImageDown, ms: 1300 },
@@ -15,38 +15,31 @@ const STAGES: { key: PipelineStage; icon: typeof Cpu; ms: number }[] = [
   { key: 'concluida', icon: CircleCheck, ms: 3600 },
 ];
 
-/** Demonstração animada do pipeline no hero: captura → processamento → YOLO → resultado. */
+const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+/** Ilustração animada do fluxo captura → processamento → detecção → resultado (exemplos fixos, não dados reais). */
 export function HeroShowcase() {
-  const { readings, sensorById } = useData();
-  const samples = useMemo(() => {
-    const pick = (q: string, v: string) => readings.find((r) => r.quality === q && r.varietyId === v);
-    return [pick('boa', 'cabernet-sauvignon'), pick('atencao', 'syrah'), pick('boa', 'moscato-canelli'), pick('critica', 'chenin-blanc'), pick('boa', 'tempranillo')].filter(
-      (r): r is NonNullable<typeof r> => !!r,
-    );
-  }, [readings]);
   const [index, setIndex] = useState(0);
-  const [stage, setStage] = useState(0);
+  const [stage, setStage] = useState(reduceMotion() ? 3 : 0);
 
   useEffect(() => {
-    if (!samples.length) return;
+    if (reduceMotion()) return;
     const t = setTimeout(() => {
       if (stage < STAGES.length - 1) setStage(stage + 1);
       else {
         setStage(0);
-        setIndex((i) => (i + 1) % samples.length);
+        setIndex((i) => (i + 1) % EXAMPLES.length);
       }
     }, STAGES[stage].ms);
     return () => clearTimeout(t);
-  }, [stage, samples.length]);
+  }, [stage]);
 
-  const reading = samples[index];
-  if (!reading) return <div className="showcase skeleton" style={{ aspectRatio: '4/3' }} />;
-  const sensor = sensorById[reading.sensorId];
+  const ex = EXAMPLES[index];
   const current = STAGES[stage].key;
   const done = current === 'concluida';
 
   return (
-    <div className="showcase">
+    <div className="showcase" aria-label="Ilustração do fluxo de análise">
       <div className="showcase-frame">
         <div className="showcase-stages" aria-live="polite">
           {STAGES.map((s, i) => (
@@ -56,50 +49,25 @@ export function HeroShowcase() {
             </span>
           ))}
         </div>
-        <GrapeScene
-          key={reading.id + (stage >= 2 ? 'b' : 'a')}
-          className="scene"
-          seed={reading.imageSeed}
-          varietyId={reading.varietyId}
-          detections={reading.detections}
-          capturedAt={reading.capturedAt}
-          sensorId={reading.sensorId}
-          block={reading.block}
-          hud
-          showBoxes={stage >= 2}
-          animateBoxes
-          scanning={stage === 1 || stage === 2}
-        />
-      </div>
-
-      <div className="float-card float-sensor">
-        <div className="kpi-icon">
-          <Wifi />
-        </div>
-        <div>
-          <strong>
-            {sensor?.id} · {sensor?.block}
-          </strong>
-          <span>ESP32-CAM · {sensor?.signal} dBm</span>
-        </div>
+        <GrapeScene key={ex.key + (stage >= 2 ? 'b' : 'a')} className="scene" seed={ex.seed} varietyId={ex.varietyId} detections={ex.detections} showBoxes={stage >= 2} animateBoxes scanning={stage === 1 || stage === 2} title="Ilustração de um cacho analisado" />
+        <span className="illustration-tag">Ilustração</span>
       </div>
 
       <div className="float-card float-result">
         <div className="fr-title">
-          <Sparkles size={12} style={{ display: 'inline', verticalAlign: '-1px', marginRight: 4 }} />
-          Resultado da IA
+          <Sparkles size={12} aria-hidden="true" /> Exemplo de resultado
         </div>
         {done ? (
-          <div className="result-enter" key={reading.id}>
-            <div className="fr-variety">{VARIETY_BY_ID[reading.varietyId].name}</div>
+          <div className="result-enter" key={ex.key}>
+            <div className="fr-variety">{VARIETY_BY_ID[ex.varietyId].name}</div>
             <div className="fr-row">
-              Confiança <strong>{formatPct(reading.confidence)}</strong>
+              Confiança <strong>{formatPct(ex.confidence)}</strong>
             </div>
             <div className="fr-row">
-              Maturação <strong>{MATURATION_LABEL[reading.maturation]}</strong>
+              Maturação <strong>{MATURATION_LABEL[ex.maturation]}</strong>
             </div>
             <div style={{ marginTop: 10 }}>
-              <QualityBadge quality={reading.quality} />
+              <QualityBadge quality={ex.quality} />
             </div>
           </div>
         ) : (

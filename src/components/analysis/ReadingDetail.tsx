@@ -1,64 +1,56 @@
 import { CalendarDays, Clock, Cpu, Eye, EyeOff, Info, MapPin, ScanSearch, Timer } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MATURATION_LABEL, MATURATION_ORDER } from '../../data/labels';
-import type { Reading, Sensor } from '../../data/types';
+import { useAuth } from '../../context/AuthContext';
+import { ANOMALY_LABEL, MATURATION_LABEL, MATURATION_ORDER, SEVERE_ANOMALIES } from '../../data/labels';
+import type { Reading } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
 import { formatDate, formatTime } from '../../lib/format';
-import { resolveImageUrl } from '../../services/api';
-import { GrapeScene } from '../grape/GrapeScene';
-import { ClassificationBadge, QualityBadge } from '../ui/Badges';
+import { ReadingImage } from '../reading/ReadingImage';
+import { ClassificationBadge, QualityBadge, SourceBadge } from '../ui/Badges';
 import { ConfidenceBar } from '../ui/ConfidenceBar';
 import { YoloResult } from './YoloResult';
 
-export const DISCLAIMER =
-  'Esta classificação é baseada na análise computacional da imagem e não substitui a avaliação agronômica profissional.';
+export const DISCLAIMER = 'Esta classificação é baseada na análise computacional da imagem e não substitui a avaliação agronômica profissional.';
 
-export function ReadingDetail({ reading, sensor, onNavigate }: { reading: Reading; sensor?: Sensor; onNavigate?: () => void }) {
+export function ReadingDetail({ reading, onNavigate }: { reading: Reading; onNavigate?: () => void }) {
   const [boxes, setBoxes] = useState(true);
+  const { can } = useAuth();
   const variety = VARIETY_BY_ID[reading.varietyId];
   const matIndex = MATURATION_ORDER.indexOf(reading.maturation);
-  const anomalies = reading.detections.filter((d) => d.kind === 'anomalia');
+  const hasImage = !!reading.imageUrl;
 
   return (
     <div className="reading-detail">
       <div className="reading-media">
         <div className="reading-image">
-          <GrapeScene
-            className="scene"
-            seed={reading.imageSeed}
-            varietyId={reading.varietyId}
-            detections={reading.detections}
-            capturedAt={reading.capturedAt}
-            sensorId={reading.sensorId}
-            block={reading.block}
-            imageUrl={resolveImageUrl(reading)}
-            hud
-            showBoxes={boxes}
-            animateBoxes
-          />
-          <button className="btn btn-sm btn-glass reading-toggle" onClick={() => setBoxes((b) => !b)}>
-            {boxes ? <EyeOff /> : <Eye />}
-            {boxes ? 'Ocultar detecções' : 'Mostrar detecções'}
-          </button>
+          <ReadingImage reading={reading} showBoxes={boxes} />
+          {hasImage && reading.detections.length > 0 && (
+            <button className="btn btn-sm btn-secondary reading-toggle" onClick={() => setBoxes((b) => !b)}>
+              {boxes ? <EyeOff /> : <Eye />}
+              {boxes ? 'Ocultar detecções' : 'Mostrar detecções'}
+            </button>
+          )}
         </div>
         <div className="detections">
-          <div className="field-label" style={{ marginBottom: 8 }}>
-            <ScanSearch size={15} style={{ display: 'inline', verticalAlign: '-3px', marginRight: 6 }} />
-            Detecções do modelo ({reading.detections.length})
+          <div className="field-label">
+            <ScanSearch size={15} aria-hidden="true" /> Detecções ({reading.detections.length})
           </div>
-          <ul>
-            {reading.detections.map((d, i) => (
-              <li key={i}>
-                <span className={`det-swatch ${d.kind === 'cacho' ? 'cluster' : anomalies.length && ['podridao', 'baga_murcha', 'lesao'].includes(d.label) ? 'severe' : 'mild'}`} />
-                <span className="mono">{d.label}</span>
-                <span className="muted">{d.kind === 'cacho' ? 'cacho' : 'anomalia'}</span>
-                <span className="mono" style={{ marginLeft: 'auto' }}>
-                  {d.confidence.toFixed(2)}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {reading.detections.length === 0 ? (
+            <p className="muted small">{reading.source === 'importacao' ? 'Registro importado: as caixas de detecção não fazem parte do arquivo.' : 'Nenhuma região identificada na imagem.'}</p>
+          ) : (
+            <ul>
+              {reading.detections.map((d, i) => (
+                <li key={i}>
+                  <span className={`det-swatch ${d.kind === 'cacho' ? 'cluster' : SEVERE_ANOMALIES.has(d.label) ? 'severe' : 'mild'}`} />
+                  <span>{d.kind === 'cacho' ? `Cacho (${VARIETY_BY_ID[d.label.replace(/_/g, '-') as keyof typeof VARIETY_BY_ID]?.name ?? d.label})` : (ANOMALY_LABEL[d.label] ?? d.label)}</span>
+                  <span className="mono" style={{ marginLeft: 'auto' }}>
+                    {(d.confidence * 100).toFixed(0)}%
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
@@ -67,17 +59,18 @@ export function ReadingDetail({ reading, sensor, onNavigate }: { reading: Readin
           <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
             <span className="badge badge-neutral mono">{reading.id}</span>
             <ClassificationBadge value={reading.classification} />
+            <SourceBadge source={reading.source} />
           </div>
-          <h2 className="display" style={{ fontSize: 30, marginTop: 12 }}>
-            {variety.name}
-          </h2>
-          <p className="muted" style={{ marginTop: 4 }}>
-            Uva {variety.type.toLowerCase()} · {variety.color}
-          </p>
+          <h2 className="reading-title">{variety?.name ?? reading.varietyId}</h2>
+          {variety && (
+            <p className="muted">
+              Uva {variety.type.toLowerCase()} · {variety.color}
+            </p>
+          )}
         </div>
 
         <div className="info-block">
-          <div className="field-label">Confiança da IA</div>
+          <div className="field-label">Confiança da detecção</div>
           <ConfidenceBar value={reading.confidence} large />
         </div>
 
@@ -92,40 +85,48 @@ export function ReadingDetail({ reading, sensor, onNavigate }: { reading: Readin
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <span>Estágio de maturação</span>
-            <strong>{MATURATION_LABEL[reading.maturation]}</strong>
-            <div className="maturation-steps" aria-hidden="true">
-              {MATURATION_ORDER.map((m, i) => (
-                <i key={m} className={i <= matIndex ? 'on' : ''} title={MATURATION_LABEL[m]} />
-              ))}
-            </div>
+            <strong>{MATURATION_LABEL[reading.maturation] ?? reading.maturation}</strong>
+            {matIndex >= 0 && (
+              <div className="maturation-steps" aria-hidden="true">
+                {MATURATION_ORDER.map((m, i) => (
+                  <i key={m} className={i <= matIndex ? 'on' : ''} title={MATURATION_LABEL[m]} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="info-block">
-          <div className="field-label">Observações</div>
-          <p style={{ fontSize: 14.5, color: 'var(--ink-700)' }}>{reading.observations}</p>
-        </div>
+        {reading.observations && (
+          <div className="info-block">
+            <div className="field-label">Observações</div>
+            <p className="reading-obs">{reading.observations}</p>
+          </div>
+        )}
 
-        <YoloResult reading={reading} animate />
+        <YoloResult reading={reading} />
 
         <div className="info-grid compact">
           <div>
             <span>
               <Cpu /> Sensor
             </span>
-            {sensor ? (
-              <Link to={`/sensores/${sensor.id}`} className="link" onClick={onNavigate}>
-                {sensor.id} · {sensor.name}
+            {can('sensores') ? (
+              <Link to={`/sensores/${reading.sensorId}`} className="link" onClick={onNavigate}>
+                {reading.sensorId} · {reading.sensorName}
               </Link>
             ) : (
-              <strong>{reading.sensorId}</strong>
+              <strong>
+                {reading.sensorId} · {reading.sensorName}
+              </strong>
             )}
           </div>
           <div>
             <span>
               <MapPin /> Local
             </span>
-            <strong>{reading.location}</strong>
+            <strong>
+              {reading.block} · {reading.location}
+            </strong>
           </div>
           <div>
             <span>
@@ -139,15 +140,17 @@ export function ReadingDetail({ reading, sensor, onNavigate }: { reading: Readin
             </span>
             <strong>{formatTime(reading.capturedAt)}</strong>
           </div>
+          {reading.source !== 'importacao' && (
+            <div>
+              <span>
+                <Timer /> Processamento
+              </span>
+              <strong>{reading.processingMs} ms</strong>
+            </div>
+          )}
           <div>
             <span>
-              <Timer /> Processamento
-            </span>
-            <strong>{reading.processingMs} ms</strong>
-          </div>
-          <div>
-            <span>
-              <ScanSearch /> Modelo
+              <ScanSearch /> Análise
             </span>
             <strong>{reading.modelVersion}</strong>
           </div>

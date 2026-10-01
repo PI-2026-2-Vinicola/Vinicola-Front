@@ -3,35 +3,30 @@ import type { Reading } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
 import { formatPct } from '../../lib/format';
 
-/** Saída do modelo YOLO no formato apresentado ao produtor. */
-export function YoloResult({ reading, animate = false }: { reading: Reading; animate?: boolean }) {
+/** Resultado no formato apresentado ao produtor (saída do detector ou registro importado). */
+export function YoloResult({ reading }: { reading: Reading }) {
   const rows: [string, string, string?][] = [
-    ['Uva identificada', VARIETY_BY_ID[reading.varietyId].name],
+    ['Uva identificada', VARIETY_BY_ID[reading.varietyId]?.name ?? reading.varietyId],
     ['Confiança', formatPct(reading.confidence)],
     ['Condição visual', reading.visualCondition],
-    ['Maturação', MATURATION_LABEL[reading.maturation]],
+    ['Maturação', MATURATION_LABEL[reading.maturation] ?? reading.maturation],
     ['Classificação', reading.classification, reading.quality],
   ];
+  const anomalies = reading.detections.filter((d) => d.kind === 'anomalia').length;
   return (
-    <div className={`yolo-output ${animate ? 'animate' : ''}`} aria-label="Resultado do modelo YOLO">
-      <div className="yolo-output-head">
-        <span className="dots" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </span>
-        <span className="mono">osais-inference · {reading.modelVersion}</span>
-      </div>
+    <div className="yolo-output" aria-label="Resultado da análise">
+      <div className="yolo-output-head mono">{reading.modelVersion}</div>
       <dl>
-        {rows.map(([k, v, q], i) => (
-          <div key={k} style={{ animationDelay: `${i * 140}ms` }}>
+        {rows.map(([k, v, q]) => (
+          <div key={k}>
             <dt>{k}:</dt>
             <dd className={q ? `tone-${q}` : ''}>{v}</dd>
           </div>
         ))}
       </dl>
       <div className="yolo-output-foot mono">
-        {reading.clustersDetected} cacho(s) · {reading.detections.filter((d) => d.kind === 'anomalia').length} anomalia(s) · {reading.processingMs} ms
+        {reading.clustersDetected} cacho(s) · {anomalies} anomalia(s)
+        {reading.source !== 'importacao' ? ` · ${reading.processingMs} ms` : ''}
       </div>
     </div>
   );

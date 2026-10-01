@@ -1,8 +1,8 @@
 {
-  "name": "osais-front",
+  "name": "oasis-front",
   "private": true,
-  "version": "1.0.0",
-  "description": "OSAIS — Observação Agroambiental Sensorizada, Inteligente e Sustentável. Plataforma web de monitoramento e classificação de uvas com IoT + Visão Computacional (YOLO).",
+  "version": "2.0.0",
+  "description": "OASIS — Observação Agroambiental Sensorizada, Inteligente e Sustentável. Plataforma web de monitoramento e classificação de uvas (IoT + visão computacional), integrada à API OASIS.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,6 +14,7 @@
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource-variable/inter": "^5.3.0",
+    "@tanstack/react-query": "^5.104.0",
     "chart.js": "^4.5.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.47.0",

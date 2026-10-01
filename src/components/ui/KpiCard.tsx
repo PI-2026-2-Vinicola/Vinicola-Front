@@ -1,56 +1,54 @@
-import { TrendingDown, TrendingUp } from 'lucide-react';
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { CountUp } from './CountUp';
 
 interface KpiCardProps {
   icon: ReactNode;
   label: string;
-  value: number;
+  /** `null` = sem dados suficientes (exibe "—", nunca um valor inventado). */
+  value: number | null;
   decimals?: number;
   suffix?: string;
   total?: string;
   foot?: ReactNode;
+  /** Variação em relação ao período anterior. */
   delta?: number | null;
-  /** Se subir é bom (verde) ou ruim (vermelho). */
+  /** `percent`: variação relativa; `points`: diferença em pontos percentuais. */
+  deltaMode?: 'percent' | 'points';
   upIsGood?: boolean;
-  accent?: 'wine' | 'good' | 'warn' | 'bad';
+  accent?: 'wine' | 'good' | 'warn' | 'bad' | 'neutral';
+  loading?: boolean;
 }
 
-const ACCENTS = {
-  wine: { background: 'var(--rose-100)', color: 'var(--wine-600)' },
-  good: { background: 'var(--good-bg)', color: 'var(--good-ink)' },
-  warn: { background: 'var(--warn-bg)', color: 'var(--warn-ink)' },
-  bad: { background: 'var(--bad-bg)', color: 'var(--bad-ink)' },
-};
-
-export function KpiCard({ icon, label, value, decimals = 0, suffix, total, foot, delta, upIsGood = true, accent = 'wine' }: KpiCardProps) {
+export function KpiCard({ icon, label, value, decimals = 0, suffix, total, foot, delta, deltaMode = 'percent', upIsGood = true, accent = 'wine', loading = false }: KpiCardProps) {
   let deltaEl: ReactNode = null;
   if (delta !== undefined && delta !== null && Number.isFinite(delta)) {
-    const up = delta >= 0;
+    const flat = Math.abs(delta) < 0.0005;
+    const up = delta > 0;
     const good = up === upIsGood;
-    const Icon = up ? TrendingUp : TrendingDown;
+    const Icon = flat ? Minus : up ? TrendingUp : TrendingDown;
+    const amount = deltaMode === 'points' ? `${Math.abs(delta * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} p.p.` : `${Math.abs(delta * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
     deltaEl = (
-      <span className={`delta ${Math.abs(delta) < 0.005 ? 'neutral' : good ? 'up-good' : 'down-bad'}`}>
+      <span className={`delta ${flat ? 'neutral' : good ? 'up-good' : 'down-bad'}`} title="Comparado ao período anterior de mesma duração">
         <Icon aria-hidden="true" />
-        {up ? '+' : '−'}
-        {Math.abs(delta * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%
+        {flat ? 'estável' : `${up ? '+' : '−'}${amount}`}
       </span>
     );
   }
   return (
-    <div className="card kpi card-hover">
-      <div className="kpi-icon" style={ACCENTS[accent]}>
-        {icon}
+    <div className={`card kpi kpi-${accent}`}>
+      <div className="kpi-top">
+        <span className="kpi-label">{label}</span>
+        <span className="kpi-icon">{icon}</span>
       </div>
-      <div className="kpi-label">{label}</div>
       <div className="kpi-value">
-        <CountUp value={value} decimals={decimals} suffix={suffix} />
-        {total && <small> / {total}</small>}
+        {loading ? <span className="skeleton" style={{ display: 'inline-block', width: 72, height: 28 }} /> : value === null ? <span className="kpi-empty">—</span> : <CountUp value={value} decimals={decimals} suffix={suffix} />}
+        {total && !loading && <small> / {total}</small>}
       </div>
       {(foot || deltaEl) && (
         <div className="kpi-foot">
           {deltaEl}
-          {foot}
+          {foot && <span>{foot}</span>}
         </div>
       )}
     </div>

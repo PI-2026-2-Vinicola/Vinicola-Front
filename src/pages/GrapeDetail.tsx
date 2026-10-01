@@ -1,15 +1,14 @@
 import { ArrowRight, Info, LogIn } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { DISCLAIMER } from '../components/analysis/ReadingDetail';
 import { VarietyHistory } from '../components/analysis/VarietyHistory';
-import { PeriodSegmented } from '../components/ui/Filters';
+import { PeriodPicker } from '../components/ui/Filters';
 import { Reveal } from '../components/ui/Reveal';
 import { useAuth } from '../context/AuthContext';
-import { useData } from '../context/DataContext';
 import type { VarietyId } from '../data/types';
 import { VARIETIES, VARIETY_BY_ID } from '../data/varieties';
-import { filterReadings, timeBuckets, type PeriodPreset } from '../lib/stats';
+import { periodQuery, type Period } from '../lib/period';
 import { CriteriaList, GrapeImage } from './Grapes';
 import NotFound from './NotFound';
 
@@ -17,10 +16,7 @@ export default function GrapeDetail() {
   const { id } = useParams();
   const variety = VARIETY_BY_ID[id as VarietyId];
   const { can } = useAuth();
-  const { readings, now } = useData();
-  const [period, setPeriod] = useState<PeriodPreset>('30');
-  const list = useMemo(() => filterReadings(readings, { varietyId: id as VarietyId, period }, now), [readings, id, period, now]);
-  const buckets = useMemo(() => timeBuckets(list, { period }, now), [list, period, now]);
+  const [period, setPeriod] = useState<Period>('30');
   if (!variety) return <NotFound />;
   const index = VARIETIES.findIndex((v) => v.id === variety.id);
   const next = VARIETIES[(index + 1) % VARIETIES.length];
@@ -102,10 +98,10 @@ export default function GrapeDetail() {
             <h2>Histórico de análises</h2>
             <p>Total analisado, distribuição e evolução das classificações desta variedade.</p>
           </div>
-          {can('analises') && <PeriodSegmented value={period} onChange={setPeriod} />}
+          {can('classificacao') && <PeriodPicker value={period} onChange={(p) => setPeriod(p)} allowCustom={false} />}
         </div>
-        {can('analises') ? (
-          <VarietyHistory varietyId={variety.id} readings={list} days={buckets} />
+        {can('classificacao') ? (
+          <VarietyHistory varietyId={variety.id} filters={periodQuery(period)} />
         ) : (
           <div className="card restricted">
             <div className="kpi-icon">

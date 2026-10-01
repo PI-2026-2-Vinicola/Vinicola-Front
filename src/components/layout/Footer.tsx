@@ -26,7 +26,7 @@ export function Footer() {
             <h4>Conhecimento</h4>
             <ul>
               <li><Link to="/uvas">Conheça nossas uvas</Link></li>
-              <li><Link to="/sobre">Como a OSAIS funciona</Link></li>
+              <li><Link to="/sobre">Como a OASIS funciona</Link></li>
               <li><Link to="/sobre#vale">Vale do São Francisco</Link></li>
               <li><Link to="/sobre#tecnologias">Tecnologias</Link></li>
             </ul>
@@ -41,7 +41,7 @@ export function Footer() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} OSAIS · Projeto Integrador — Inteligência de Dados no Vale do São Francisco</span>
+          <span>© {new Date().getFullYear()} OASIS · Projeto Integrador — Inteligência de Dados no Vale do São Francisco</span>
           <span>Observar → Sensorizar → Analisar → Inteligir → Sustentar</span>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { ArrowRight, BrainCircuit, Camera, ChartNoAxesCombined, Image, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useData } from '../../context/DataContext';
-import { avgConfidence } from '../../lib/stats';
+import { usePublicOverview } from '../../hooks/queries';
+import { formatRelative } from '../../lib/format';
 import { CountUp } from '../ui/CountUp';
 import { HeroShowcase } from './HeroShowcase';
 import { VineyardRows } from './VineyardRows';
@@ -15,8 +15,8 @@ const FLOW = [
 ];
 
 export function Hero() {
-  const { sensors, readings } = useData();
-  const online = sensors.filter((s) => s.status !== 'offline').length;
+  const overview = usePublicOverview();
+  const o = overview.data;
   return (
     <section className="hero">
       <VineyardRows className="hero-rows" />
@@ -27,41 +27,45 @@ export function Hero() {
             Observe o campo. Entenda os dados. <em>Decida melhor.</em>
           </h1>
           <p className="hero-sub">
-            A OSAIS conecta sensores, Inteligência Artificial e visão computacional para transformar imagens do cultivo em informações inteligentes sobre as uvas.
+            A OASIS conecta sensores, Inteligência Artificial e visão computacional para transformar imagens do cultivo em informações sobre as uvas.
           </p>
           <div className="hero-ctas">
-            <Link to="/dashboard" className="btn btn-lg btn-light">
+            <Link to="/login" className="btn btn-lg btn-light">
               Acessar plataforma <ArrowRight className="arrow" />
             </Link>
             <a href="#solucao" className="btn btn-lg btn-glass">
               Conhecer a solução
             </a>
           </div>
-          <div className="hero-stats">
-            <div>
-              <strong>
-                <CountUp value={online} />/{sensors.length}
-              </strong>
-              <span>sensores ativos</span>
-            </div>
-            <div>
-              <strong>
-                <CountUp value={readings.length} />
-              </strong>
-              <span>análises em 30 dias</span>
-            </div>
-            <div>
-              <strong>
-                <CountUp value={6} />
-              </strong>
-              <span>variedades monitoradas</span>
-            </div>
-            <div>
-              <strong>
-                <CountUp value={avgConfidence(readings) * 100} decimals={1} suffix="%" />
-              </strong>
-              <span>confiança média da IA</span>
-            </div>
+          <div className="hero-stats" aria-live="polite">
+            {o ? (
+              <>
+                <div>
+                  <strong>
+                    <CountUp value={o.sensorsOnline} />/{o.sensorsTotal}
+                  </strong>
+                  <span>sensores comunicando</span>
+                </div>
+                <div>
+                  <strong>
+                    <CountUp value={o.analyses30d} />
+                  </strong>
+                  <span>análises em 30 dias</span>
+                </div>
+                <div>
+                  <strong>
+                    <CountUp value={o.varietiesMonitored} />
+                  </strong>
+                  <span>variedades analisadas</span>
+                </div>
+                <div>
+                  <strong>{o.lastAnalysisAt ? formatRelative(o.lastAnalysisAt) : '—'}</strong>
+                  <span>última análise</span>
+                </div>
+              </>
+            ) : (
+              <p className="hero-stats-note">{overview.isError ? 'Indicadores indisponíveis no momento.' : 'Carregando indicadores…'}</p>
+            )}
           </div>
         </div>
         <HeroShowcase />

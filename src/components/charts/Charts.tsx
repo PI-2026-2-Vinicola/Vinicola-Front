@@ -1,8 +1,7 @@
 import { CircleCheck, OctagonAlert, TriangleAlert } from 'lucide-react';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { QUALITY_COLOR, QUALITY_LABEL, QUALITY_ORDER } from '../../data/labels';
-import type { Quality } from '../../data/types';
-import type { DayBucket, QualityCount } from '../../lib/stats';
+import type { Bucket, Quality, QualityCount } from '../../data/types';
 import { barValueLabels, crosshair, INK } from './setup';
 import './setup';
 
@@ -41,7 +40,7 @@ const baseScales = {
 } as const;
 
 /** Análises por período — colunas empilhadas por qualidade (cores de status). */
-export function AnalysesByDayChart({ days }: { days: DayBucket[] }) {
+export function AnalysesByDayChart({ days }: { days: Bucket[] }) {
   return (
     <Bar
       data={{
@@ -145,7 +144,7 @@ export function HorizontalBars({ labels, values, color = '#a3325a', tooltipLabel
 }
 
 /** Evolução das classificações (% por dia) — três linhas de status. */
-export function QualityEvolutionChart({ days }: { days: DayBucket[] }) {
+export function QualityEvolutionChart({ days }: { days: Bucket[] }) {
   const series = (q: Quality) => days.map((d) => (d.total ? Math.round((d[q] / d.total) * 1000) / 10 : null));
   return (
     <Line
@@ -158,7 +157,8 @@ export function QualityEvolutionChart({ days }: { days: DayBucket[] }) {
           backgroundColor: q === 'boa' ? 'rgba(31,157,85,0.08)' : QUALITY_COLOR[q],
           fill: q === 'boa' ? 'origin' : false,
           borderWidth: 2,
-          tension: 0.35,
+          tension: 0.3,
+          cubicInterpolationMode: 'monotone',
           pointRadius: 0,
           pointHoverRadius: 5,
           pointHoverBorderWidth: 2,
@@ -181,7 +181,7 @@ export function QualityEvolutionChart({ days }: { days: DayBucket[] }) {
 }
 
 /** Volume diário de análises — linha única com área suave. */
-export function VolumeLineChart({ days, color = '#a3325a' }: { days: DayBucket[]; color?: string }) {
+export function VolumeLineChart({ days, color = '#a3325a' }: { days: Bucket[]; color?: string }) {
   return (
     <Line
       data={{
@@ -194,7 +194,8 @@ export function VolumeLineChart({ days, color = '#a3325a' }: { days: DayBucket[]
             backgroundColor: `${color}1a`,
             fill: 'origin',
             borderWidth: 2,
-            tension: 0.35,
+            tension: 0.3,
+          cubicInterpolationMode: 'monotone',
             pointRadius: 0,
             pointHoverRadius: 5,
             pointHoverBorderWidth: 2,
@@ -221,7 +222,8 @@ export function MultiLineChart({ labels, series }: { labels: string[]; series: {
           borderColor: s.color,
           backgroundColor: s.color,
           borderWidth: 2,
-          tension: 0.35,
+          tension: 0.3,
+          cubicInterpolationMode: 'monotone',
           pointRadius: 0,
           pointHoverRadius: 5,
           pointHoverBorderWidth: 2,
@@ -230,6 +232,54 @@ export function MultiLineChart({ labels, series }: { labels: string[]; series: {
       }}
       plugins={[crosshair]}
       options={{ interaction: { mode: 'index', intersect: false }, scales: baseScales }}
+    />
+  );
+}
+
+/** Temperatura (°C, eixo esquerdo) e umidade do ar (%, eixo direito). */
+export function EnvironmentChart({ labels, temperature, humidity }: { labels: string[]; temperature: (number | null)[]; humidity: (number | null)[] }) {
+  return (
+    <Line
+      data={{
+        labels,
+        datasets: [
+          { label: 'Temperatura (°C)', data: temperature, borderColor: '#c2410c', backgroundColor: '#c2410c', yAxisID: 'y', borderWidth: 2, tension: 0.3, pointRadius: labels.length > 40 ? 0 : 2, spanGaps: true },
+          { label: 'Umidade do ar (%)', data: humidity, borderColor: '#2563eb', backgroundColor: '#2563eb', yAxisID: 'y1', borderWidth: 2, tension: 0.3, pointRadius: labels.length > 40 ? 0 : 2, spanGaps: true, borderDash: [5, 4] },
+        ],
+      }}
+      plugins={[crosshair]}
+      options={{
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: baseScales.x,
+          y: { position: 'left', grid: { color: INK.grid }, border: { display: false }, ticks: { color: INK.muted, callback: (v) => `${v}°` } },
+          y1: { position: 'right', min: 0, max: 100, grid: { display: false }, border: { display: false }, ticks: { color: INK.muted, callback: (v) => `${v}%` } },
+        },
+      }}
+    />
+  );
+}
+
+/** Bateria (%) e sinal Wi-Fi (dBm) informados pelo dispositivo. */
+export function TelemetryChart({ labels, battery, signal }: { labels: string[]; battery: (number | null)[]; signal: (number | null)[] }) {
+  return (
+    <Line
+      data={{
+        labels,
+        datasets: [
+          { label: 'Bateria (%)', data: battery, borderColor: '#1f9d55', backgroundColor: '#1f9d55', yAxisID: 'y', borderWidth: 2, tension: 0.25, pointRadius: labels.length > 40 ? 0 : 2, spanGaps: true },
+          { label: 'Sinal (dBm)', data: signal, borderColor: '#6d1c3f', backgroundColor: '#6d1c3f', yAxisID: 'y1', borderWidth: 2, tension: 0.25, pointRadius: labels.length > 40 ? 0 : 2, spanGaps: true, borderDash: [5, 4] },
+        ],
+      }}
+      plugins={[crosshair]}
+      options={{
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: { ...baseScales.x, ticks: { ...baseScales.x.ticks, maxTicksLimit: 8 } },
+          y: { position: 'left', min: 0, max: 100, grid: { color: INK.grid }, border: { display: false }, ticks: { color: INK.muted, callback: (v) => `${v}%` } },
+          y1: { position: 'right', min: -100, max: -30, grid: { display: false }, border: { display: false }, ticks: { color: INK.muted } },
+        },
+      }}
     />
   );
 }

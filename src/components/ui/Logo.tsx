@@ -1,6 +1,6 @@
 import { useId } from 'react';
 
-/** Marca OSAIS: cacho de uva formado por pontos de dados + ondas de sinal do sensor. */
+/** Marca OASIS: cacho de uva formado por pontos de dados + ondas de sinal do sensor. */
 export function LogoMark({ className = 'brand-mark', light = false }: { className?: string; light?: boolean }) {
   const id = useId();
   return (
@@ -35,7 +35,7 @@ export function Brand({ light = false }: { light?: boolean }) {
     <span className="brand">
       <LogoMark light={light} />
       <span className="brand-text">
-        OSAIS
+        OASIS
         <small>Observação Agroambiental</small>
       </span>
     </span>

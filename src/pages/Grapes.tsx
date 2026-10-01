@@ -38,7 +38,7 @@ export default function Grapes() {
   const list = VARIETIES.filter((v) => type === 'todas' || v.type === type);
   return (
     <>
-      <PageHero eyebrow="Biblioteca educacional" title="Conheça nossas uvas" description="As variedades cultivadas na propriedade, suas características e os critérios visuais usados pela OSAIS para classificar cada leitura." />
+      <PageHero eyebrow="Biblioteca educacional" title="Conheça nossas uvas" description="As variedades do catálogo da OASIS, suas características e os critérios visuais usados para classificar cada leitura. As imagens são ilustrações." />
       <div className="container page-body">
         <div className="card toolbar" style={{ marginBottom: 20 }}>
           <div className="segmented" role="group" aria-label="Tipo de uva">

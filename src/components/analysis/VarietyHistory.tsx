@@ -1,41 +1,43 @@
 import { ArrowRight, CircleCheck, Hash, OctagonAlert, Sparkles, TriangleAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { Reading, VarietyId } from '../../data/types';
+import { MATURATION_LABEL } from '../../data/labels';
+import type { Maturation, VarietyId } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
+import { useBreakdown, useByDay, useSummary } from '../../hooks/queries';
 import { formatNumber, formatPct } from '../../lib/format';
-import { avgConfidence, countByQuality, groupByDay, type DayBucket } from '../../lib/stats';
+import type { ReadingQuery } from '../../services/api';
 import { ChartCard } from '../charts/ChartCard';
-import { AnalysesByDayChart, QualityLegend } from '../charts/Charts';
-import { GrapeScene } from '../grape/GrapeScene';
+import { AnalysesByDayChart, HorizontalBars, QualityLegend } from '../charts/Charts';
+import { EmptyState, ErrorState, LoadingBlock } from '../ui/States';
 
-/** Resumo e evolução temporal de uma variedade (histórico por variedade). */
-export function VarietyHistory({ varietyId, readings, days }: { varietyId: VarietyId; readings: Reading[]; days?: DayBucket[] }) {
+/** Resumo, evolução e maturação de uma variedade a partir das leituras gravadas. */
+export function VarietyHistory({ varietyId, filters }: { varietyId: VarietyId; filters: ReadingQuery }) {
   const v = VARIETY_BY_ID[varietyId];
-  const c = countByQuality(readings);
-  const series =
-    days ??
-    (() => {
-      if (!readings.length) return [];
-      const times = readings.map((r) => new Date(r.capturedAt).getTime());
-      return groupByDay(readings, Math.min(...times), Math.max(...times));
-    })();
+  const f = { ...filters, varietyId };
+  const summary = useSummary(f);
+  const days = useByDay(f);
+  const maturation = useBreakdown('maturation', f);
+
+  if (summary.isPending) return <LoadingBlock height={320} />;
+  if (summary.isError) return <ErrorState error={summary.error} onRetry={() => void summary.refetch()} />;
+  const s = summary.data;
+  const c = s.quality;
+  if (c.total === 0)
+    return (
+      <div className="card">
+        <EmptyState title={`Nenhuma leitura de ${v.name} no período`}>Amplie o período ou envie imagens de um sensor instalado em talhão desta variedade.</EmptyState>
+      </div>
+    );
+
+  const mat = maturation.data ?? [];
   return (
     <div className="variety-summary">
       <section className="card card-pad">
-        <div className="vs-head">
-          <div className="vs-thumb">
-            <GrapeScene className="scene" seed={4242} varietyId={varietyId} detections={[{ kind: 'cacho', label: '', confidence: 1, box: [0.2, 0.14, 0.6, 0.74] }]} showBoxes={false} />
-          </div>
-          <div>
-            <span className="eyebrow">Histórico da variedade</span>
-            <h3 className="display" style={{ fontSize: 26, marginTop: 4 }}>
-              {v.name}
-            </h3>
-            <span className="muted" style={{ fontSize: 13.5 }}>
-              Uva {v.type.toLowerCase()} · {v.color}
-            </span>
-          </div>
-        </div>
+        <span className="eyebrow">Histórico da variedade</span>
+        <h3 className="vs-name">{v.name}</h3>
+        <span className="muted small">
+          Uva {v.type.toLowerCase()} · {v.color}
+        </span>
         <div className="vs-numbers">
           <div>
             <span>
@@ -45,40 +47,60 @@ export function VarietyHistory({ varietyId, readings, days }: { varietyId: Varie
           </div>
           <div>
             <span>
-              <Sparkles /> Média de confiança
+              <Sparkles /> Confiança média
             </span>
-            <strong>{formatPct(avgConfidence(readings), 1)}</strong>
+            <strong>{formatPct(s.avgConfidence, 1)}</strong>
           </div>
           <div>
-            <span style={{ color: 'var(--good-ink)' }}>
+            <span className="tone-good">
               <CircleCheck /> Boa
             </span>
-            <strong>{formatNumber(c.boa)}</strong>
+            <strong>
+              {formatNumber(c.boa)} <small>{formatPct(c.boa / c.total)}</small>
+            </strong>
           </div>
           <div>
-            <span style={{ color: 'var(--warn-ink)' }}>
+            <span className="tone-warn">
               <TriangleAlert /> Atenção
             </span>
-            <strong>{formatNumber(c.atencao)}</strong>
+            <strong>
+              {formatNumber(c.atencao)} <small>{formatPct(c.atencao / c.total)}</small>
+            </strong>
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
-            <span style={{ color: 'var(--bad-ink)' }}>
+            <span className="tone-bad">
               <OctagonAlert /> Necessita atenção
             </span>
-            <strong>{formatNumber(c.critica)}</strong>
+            <strong>
+              {formatNumber(c.critica)} <small>{formatPct(c.critica / c.total)}</small>
+            </strong>
           </div>
         </div>
-        <Link to={`/uvas/${v.id}`} className="link" style={{ marginTop: 16 }}>
-          Critérios de classificação da variedade <ArrowRight />
-        </Link>
+        <div className="row" style={{ gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
+          <Link to={`/uvas/${v.id}`} className="link">
+            Critérios de classificação <ArrowRight />
+          </Link>
+          <Link to={`/historico?variedade=${v.id}`} className="link">
+            Ver leituras <ArrowRight />
+          </Link>
+        </div>
       </section>
       <ChartCard
         title="Evolução das classificações"
         subtitle={`${v.name} · leituras por dia`}
         legend={<QualityLegend counts={c} />}
-        table={{ columns: ['Dia', 'Boa', 'Atenção', 'Necessita atenção', 'Confiança média'], rows: series.map((d) => [d.label, d.boa, d.atencao, d.critica, d.total ? formatPct(d.avgConfidence) : '—']) }}
+        table={days.data ? { columns: ['Dia', 'Boa', 'Atenção', 'Necessita atenção', 'Confiança média'], rows: days.data.map((d) => [d.label, d.boa, d.atencao, d.critica, formatPct(d.avgConfidence)]) } : undefined}
       >
-        <AnalysesByDayChart days={series} />
+        {days.isPending ? <LoadingBlock /> : days.isError ? <ErrorState error={days.error} compact /> : <AnalysesByDayChart days={days.data} />}
+      </ChartCard>
+      <ChartCard title="Estágios de maturação" subtitle="Estimados pela cor das bagas (ou informados na importação)" size="sm">
+        {maturation.isPending ? (
+          <LoadingBlock height={180} />
+        ) : mat.length === 0 ? (
+          <EmptyState compact title="Sem dados de maturação" />
+        ) : (
+          <HorizontalBars labels={mat.map((m) => MATURATION_LABEL[m.key as Maturation] ?? m.key)} values={mat.map((m) => m.total)} color={v.chartColor} tooltipLabel="Leituras" />
+        )}
       </ChartCard>
     </div>
   );

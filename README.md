@@ -1,120 +1,86 @@
-# OSAIS — Frontend
+# OASIS — Frontend
 
 **Observação Agroambiental Sensorizada, Inteligente e Sustentável**
 
-Aplicação web da OSAIS: IoT + Inteligência Artificial + visão computacional (YOLO) para monitoramento e classificação de uvas, integrada ao Projeto Integrador **“Inteligência de Dados no Vale do São Francisco”**.
+Aplicação web da OASIS (IoT + visão computacional para monitoramento e classificação de uvas), do Projeto Integrador **“Inteligência de Dados no Vale do São Francisco”**.
 
-> Observar → Sensorizar → Analisar → Inteligir → Sustentar
-
-O protótipo é **totalmente demonstrável sem sensores físicos**: sem `VITE_API_URL`, os dados (6 sensores, 6 variedades e cerca de 1.400 leituras em 30 dias) são gerados no navegador de forma determinística. Com `VITE_API_URL`, a mesma interface consome a API FastAPI do repositório [`Vinicola-back`](https://github.com/PI-2026-2-Vinicola/Vinicola-back).
-
-## Funcionalidades
-
-| Área | O que tem |
-| --- | --- |
-| **Landing** (`/`) | Hero com a demonstração animada do pipeline (captura → processamento → YOLO → resultado), significado da sigla, ciclo conceitual, arquitetura Device/Edge/Cloud, integração YOLO (entrada → saída), prévia da plataforma, biblioteca de uvas, Vale do São Francisco, sustentabilidade, tecnologias e CTA final |
-| **Login** (`/login`) | Autenticação simulada com três perfis e recuperação de senha |
-| **Dashboard** (`/dashboard`) | Sensores ativos, leituras, uvas analisadas, qualidade geral, alertas, distribuição de qualidade, análises por período, evolução, atividade dos sensores, distribuição das variedades, mapa e últimas leituras |
-| **Sensores** (`/sensores`) | Mapa (Leaflet, com camadas mapa/satélite e talhões), marcadores distintos para ativo/atenção/offline, cartões e tabela de sensores |
-| **Sensor** (`/sensores/:id`) | Página individual com filtros de período (inclusive personalizado), indicadores, gráfico e linha do tempo das leituras |
-| **Análises** (`/analises`) | Painel analítico filtrável por variedade, período e sensor; histórico por variedade; aba **Registro e processamento**, com o pipeline animado Sensor IoT → Captura → Envio → Processamento → YOLO/IA → Identificação → Classificação → Armazenamento, captura automática e envio de imagem |
-| **Histórico** (`/historico`) | Tabela com pesquisa, filtros (período, sensor, variedade, classificação, qualidade), ordenação, paginação, exportação CSV e modal de detalhes |
-| **Análise** (`/historico/:id`) | Imagem analisada com as caixas do YOLO, barra de confiança, resultado da IA, maturação, observações e informações do sensor |
-| **Uvas** (`/uvas`, `/uvas/:id`) | Biblioteca educacional com características, critérios de classificação (Boa, Atenção e Necessita atenção) e histórico por variedade |
-| **Sobre** (`/sobre`) | Conceito, arquitetura, roteiro de integração com o campo real, Projeto Integrador e tecnologias |
-| **Integrações** (`/integracoes`) | Somente para administradores: fonte de dados, modelo, endpoints, exemplo de ingestão e matriz de permissões |
-
-### Perfis de demonstração
-
-Senha para todos os perfis: `osais2026`
-
-| Perfil | E-mail | Acesso |
-| --- | --- | --- |
-| Administrador | `admin@osais.agr.br` | Acesso total (inclui Integrações) |
-| Gestor | `gestor@osais.agr.br` | Dashboard, sensores, análises e histórico |
-| Operador | `operador@osais.agr.br` | Leituras, imagens e resultados das análises |
-
-## Identidade visual
-
-- **Identidade:** vinho (`#6d1c3f` / `#a3325a`), rosa claro (`#f7d6e1`) e branco.
-- **Status (separados da identidade):** verde = Boa, amarelo = Atenção, vermelho = Necessita atenção. Sempre acompanhados de ícone e rótulo.
-- **Variedades nos gráficos:** paleta categórica validada para daltonismo (protanopia/deuteranopia) e contraste ≥ 3:1.
-- **Tipografia:** Fraunces (títulos) e Inter (interface).
-- **Scrolling Transparent Navbar:** a barra começa transparente sobre o hero e ganha um fundo *glassmorphism* ao rolar.
-- **Imagens das uvas:** geradas proceduralmente em SVG (`GrapeScene`), com as caixas de detecção desenhadas sobre a imagem. No modo API, a imagem real enviada pelo sensor substitui a ilustração.
+Todos os dados exibidos vêm da API [`Vinicola-back`](https://github.com/PI-2026-2-Vinicola/Vinicola-back): não há dados gerados no navegador. Sem dados registrados, as telas mostram estados vazios e orientam o primeiro passo (cadastrar sensor, importar arquivo ou enviar imagem).
 
 ## Executando
 
+Pré-requisito: a API rodando em `http://localhost:8000` (veja o README do Vinicola-back).
+
 ```bash
 npm install
-npm run dev        # http://localhost:5173
-npm run build      # typecheck + build de produção em dist/
-npm test           # testes (Vitest) do gerador de dados e dos filtros
+npm run dev        # http://localhost:5173 — /api é encaminhado para http://localhost:8000
+npm run build      # verificação de tipos + build de produção em dist/
+npm test           # testes (Vitest)
 ```
 
-### Conectando à API
+Para apontar o servidor de desenvolvimento para outra API: `OASIS_API_PROXY=http://192.168.0.10:8000 npm run dev`.
+
+Na primeira execução da API, o administrador inicial é criado com o e-mail `OASIS_ADMIN_EMAIL` (padrão `admin@oasis.agr.br`) e a senha de `OASIS_ADMIN_PASSWORD` — ou uma senha aleatória exibida no terminal da API. Os demais usuários são criados em **Administração → Usuários**.
+
+### Produção
 
 ```bash
-cp .env.example .env
-# VITE_API_URL=http://localhost:8000
-npm run dev
+VITE_API_URL=https://api.suaempresa.com.br npm run build
 ```
 
-A API está no repositório `Vinicola-back`. Com ela conectada, o login usa JWT, as listas vêm de `/api/v1/sensors` e `/api/v1/readings`, e o envio de imagem na aba **Registro e processamento** chama `POST /api/v1/ingest`, o mesmo endpoint usado pelo ESP32 e pelo gateway de edge.
+`VITE_API_URL` vazio = API na mesma origem do site (ex.: proxy reverso servindo `/api`). `VITE_BASE` define o subdiretório de publicação. `vercel.json` e `public/_redirects` já redirecionam as rotas para o `index.html`. Inclua a origem do site em `CORS_ORIGINS` na API.
+
+## Páginas
+
+| Rota | Perfis | Conteúdo |
+| --- | --- | --- |
+| `/` | público | Apresentação da solução; números agregados reais (`/public/overview`); ilustrações do fluxo identificadas como tal |
+| `/uvas`, `/uvas/:id` | público | Biblioteca de variedades e critérios de classificação; com login, histórico real da variedade |
+| `/sobre` | público | Conceito, arquitetura e Projeto Integrador |
+| `/login` | público | Login com mensagens de erro e bloqueio por tentativas; orientação de redefinição de senha pelo administrador |
+| `/dashboard` | admin, gestor | Indicadores do período com comparação ao período anterior, ambiente (temperatura/umidade), gráficos por dia/hora, evolução, sensores, variedades, mapa, alertas e últimas leituras |
+| `/sensores` | admin, gestor | Mapa com coordenadas reais, status calculado, filtros por status/bloco/busca, tabela e cartões; cadastro de sensor (admin) com exibição única do token |
+| `/sensores/:id` | admin, gestor | Indicadores, leituras por dia, condições ambientais, bateria e sinal, leituras paginadas; editar, gerar token, desativar, registrar medição |
+| `/analises` | todos | **Enviar imagem** (validação → análise na API → resultado com caixas sobre a foto) e **Painel analítico** filtrável |
+| `/classificacao` | todos | Resultado por variedade (quantidade, % por classificação, confiança), filtro por tipo e período, evolução e maturação |
+| `/historico`, `/historico/:id` | todos | Histórico paginado no servidor com filtros combináveis (período, sensor, bloco, variedade, qualidade, classificação, maturação, origem, busca), ordenação, exportação CSV, detalhe e exclusão (admin) |
+| `/importacao` | admin, gestor | Importação de leituras, sensores e medições (CSV, Excel, JSON) com pré-visualização validada pelo servidor, tratamento de duplicados e histórico de importações |
+| `/administracao` | admin | Usuários e perfis, estado do sistema, auditoria e integração de dispositivos |
+| `/conta` | todos | Dados do usuário e troca de senha |
+
+As permissões da interface espelham as regras da API, que é quem de fato autoriza cada operação.
 
 ## Estrutura
 
 ```
 src/
+├── services/http.ts      # fetch com token, timeout, erros em português, download e imagens autenticadas
+├── services/api.ts       # funções tipadas para cada endpoint + matriz de permissões
+├── hooks/queries.ts      # consultas React Query (cache, paginação mantendo dados anteriores)
+├── context/AuthContext   # sessão validada em /auth/me; expiração encerra a sessão
+├── data/                 # tipos do contrato da API, rótulos e catálogo de variedades
+├── lib/                  # períodos, formatação, cliente de cache
 ├── components/
-│   ├── analysis/   # detalhe da análise, saída YOLO, pipeline, histórico por variedade
-│   ├── charts/     # Chart.js (configuração, cards com visão em tabela)
-│   ├── grape/      # GrapeScene — imagem procedural + caixas YOLO + HUD da câmera
-│   ├── landing/    # seções da landing page
-│   ├── layout/     # navbar, footer, page hero, guards de acesso
-│   ├── map/        # mapa Leaflet dos sensores
-│   └── ui/         # badges, KPI, modal, filtros, reveal, count-up
-├── context/        # AuthContext (perfis) e DataContext (fonte de dados)
-├── data/           # tipos, variedades, sensores e gerador de dados simulados
-├── lib/            # filtros, agregações e formatação (pt-BR)
-├── pages/          # rotas
-├── services/api.ts # camada de dados: demo ↔ API
-└── styles/         # tokens e CSS
+│   ├── layout/           # AppShell (menu lateral), PageHeader, Navbar pública, guardas de rota
+│   ├── reading/          # imagem real da leitura com as caixas de detecção
+│   ├── analysis/         # detalhe da leitura, envio de imagem, histórico por variedade
+│   ├── sensors/          # formulário de sensor e exibição do token
+│   ├── charts/ map/ ui/  # gráficos (Chart.js), mapa (Leaflet), estados, toasts, filtros
+│   └── landing/ grape/   # página inicial e ilustração procedural dos cachos
+├── pages/                # uma página por rota (carregadas sob demanda)
+└── styles/               # tokens, componentes, landing e app.css (área autenticada)
 ```
 
-## Contrato de dados
+## Estados e feedback
 
-O tipo `Reading` (`src/data/types.ts`) é o mesmo retornado pela API:
+Toda consulta tem estado de carregamento, erro (com “Tentar novamente” e mensagem específica para falta de conexão com a API ou falta de permissão) e vazio. Indicadores sem base exibem “—” em vez de zero inventado; a evolução das classificações pede pelo menos dois dias com dados. Ações (cadastro, envio, importação, exclusão, troca de senha) mostram progresso, erros de validação do servidor e notificação de sucesso, e atualizam automaticamente as telas dependentes.
 
-```json
-{
-  "id": "OS-01424",
-  "sensorId": "S-001",
-  "block": "Bloco A",
-  "location": "Bloco A — Fileira 12",
-  "capturedAt": "2026-09-23T16:52:00.000Z",
-  "varietyId": "cabernet-sauvignon",
-  "quality": "boa",
-  "confidence": 0.94,
-  "maturation": "adequada",
-  "visualCondition": "Boa",
-  "classification": "APROVADA",
-  "observations": "Cacho uniforme…",
-  "detections": [{ "kind": "cacho", "label": "cabernet_sauvignon", "confidence": 0.94, "box": [0.31, 0.15, 0.37, 0.64] }],
-  "clustersDetected": 1,
-  "imageUrl": "/api/v1/readings/OS-01424/image",
-  "modelVersion": "YOLOv8n-osais v0.3",
-  "processingMs": 312,
-  "stage": "concluida"
-}
-```
+## Identidade visual
 
-As caixas (`box`) seguem o formato normalizado do YOLO: `x, y, largura, altura`, com valores entre 0 e 1.
-
-## Publicação
-
-O build é estático (`dist/`). Já estão incluídos `vercel.json` e `public/_redirects` (Netlify) com o *fallback* das rotas. Para publicar em um subdiretório, como no GitHub Pages, use `VITE_BASE=/nome-do-repo/ npm run build`.
+- Vinho (`#6d1c3f` / `#86264e`), rosa claro e branco; cores de status (verde, amarelo, vermelho) sempre com ícone e rótulo.
+- Área autenticada com visual sóbrio: superfícies brancas, bordas finas, sem gradientes; página pública com o hero institucional.
+- Tipografia Fraunces (títulos da página pública) e Inter (interface).
+- As figuras de cachos da página inicial e da biblioteca são ilustrações vetoriais e estão marcadas como tal; nas leituras, a imagem exibida é a foto real processada pela API.
 
 ---
 
-A classificação apresentada é baseada na análise computacional da imagem e **não substitui a avaliação agronômica profissional**.
+A classificação é baseada na análise computacional da imagem e **não substitui a avaliação agronômica profissional**.

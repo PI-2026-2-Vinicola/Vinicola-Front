@@ -784,20 +784,6 @@
 }
 
 /* ---------- Estados ---------- */
-.empty {
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  text-align: center;
-  padding: 48px 24px;
-  color: var(--ink-500);
-}
-
-.empty svg {
-  width: 36px;
-  height: 36px;
-  color: var(--rose-400);
-}
 
 .skeleton {
   border-radius: 12px;

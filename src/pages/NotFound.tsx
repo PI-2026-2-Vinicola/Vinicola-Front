@@ -1,7 +1,22 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, SearchX } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function NotFound() {
+export default function NotFound({ inline = false, title = 'Página não encontrada', back = '/historico' }: { inline?: boolean; title?: string; back?: string }) {
+  if (inline)
+    return (
+      <div className="page">
+        <div className="card restricted">
+          <div className="kpi-icon">
+            <SearchX />
+          </div>
+          <h2>{title}</h2>
+          <p>O registro pode ter sido excluído ou o endereço está incorreto.</p>
+          <Link to={back} className="btn btn-secondary">
+            <ArrowLeft /> Voltar
+          </Link>
+        </div>
+      </div>
+    );
   return (
     <section className="notfound">
       <div>

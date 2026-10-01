@@ -118,14 +118,6 @@
   animation: fadeIn 0.3s ease;
 }
 
-.map-marker-pulse {
-  position: absolute;
-  inset: 7px;
-  border-radius: 50%;
-  background: var(--c);
-  animation: pulseRing 2s var(--ease) infinite;
-}
-
 .map-marker-label {
   position: absolute;
   top: 100%;
@@ -157,21 +149,6 @@
   border-radius: 3px;
   width: 12px;
   height: 12px;
-}
-
-.block-label {
-  background: rgba(255, 255, 255, 0.85) !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  border-radius: 999px !important;
-  padding: 2px 9px !important;
-  font-size: 11px !important;
-  font-weight: 600;
-  color: var(--wine-700) !important;
-}
-
-.block-label::before {
-  display: none;
 }
 
 .sensor-popup .leaflet-popup-content-wrapper {

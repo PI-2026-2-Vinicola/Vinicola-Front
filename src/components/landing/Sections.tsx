@@ -31,17 +31,17 @@ import {
   TestTube,
   Wifi,
 } from 'lucide-react';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { useData } from '../../context/DataContext';
-import { VARIETIES } from '../../data/varieties';
+import { MATURATION_LABEL } from '../../data/labels';
+import { VARIETIES, VARIETY_BY_ID } from '../../data/varieties';
+import { usePublicOverview } from '../../hooks/queries';
 import { useInView } from '../../hooks/useInView';
-import { avgConfidence, countByQuality, groupByDay, periodRange, filterReadings } from '../../lib/stats';
-import { YoloResult } from '../analysis/YoloResult';
-import { QualityEvolutionChart } from '../charts/Charts';
+import { formatPct, formatRelative } from '../../lib/format';
 import { GrapeScene } from '../grape/GrapeScene';
 import { KpiCard } from '../ui/KpiCard';
 import { Reveal } from '../ui/Reveal';
+import { EXAMPLES } from './examples';
 import { VineyardRows } from './VineyardRows';
 
 export function SectionHead({ eyebrow, title, text, center = false }: { eyebrow: string; title: ReactNode; text?: ReactNode; center?: boolean }) {
@@ -109,7 +109,7 @@ export function Cycle() {
         <SectionHead
           eyebrow="Conceito central"
           title={<>Observar → Sensorizar → Analisar → Inteligir → Sustentar</>}
-          text="Cada etapa da OSAIS transforma o que acontece no campo em conhecimento — do registro da imagem à decisão do produtor."
+          text="Cada etapa da OASIS transforma o que acontece no campo em conhecimento — do registro da imagem à decisão do produtor."
           center
         />
         <div className="cycle">
@@ -202,7 +202,7 @@ export function Architecture({ id = 'como-funciona' }: { id?: string }) {
       <div className="container">
         <SectionHead
           eyebrow="Arquitetura IoT"
-          title="Como a OSAIS funciona?"
+          title="Como a OASIS funciona?"
           text="Três camadas trabalham juntas para levar a imagem do vinhedo até a decisão: Device, Edge e Cloud."
         />
         <div className="arch">
@@ -274,53 +274,54 @@ const DETECTS = [
 ];
 
 export function YoloShowcase() {
-  const { readings } = useData();
   const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.35 });
-  const sample = useMemo(() => {
-    const pool = readings.filter((r) => r.varietyId === 'cabernet-sauvignon' && r.quality === 'boa' && r.maturation === 'adequada');
-    return pool.sort((a, b) => Math.abs(a.confidence - 0.94) - Math.abs(b.confidence - 0.94))[0] ?? readings[0];
-  }, [readings]);
-  if (!sample) return null;
+  const ex = EXAMPLES[0];
+  const rows: [string, string, string?][] = [
+    ['Uva identificada', VARIETY_BY_ID[ex.varietyId].name],
+    ['Confiança', formatPct(ex.confidence)],
+    ['Condição visual', ex.visualCondition],
+    ['Maturação', MATURATION_LABEL[ex.maturation]],
+    ['Classificação', ex.classification, ex.quality],
+  ];
   return (
     <section className="section" id="yolo">
       <div className="container">
         <SectionHead
           eyebrow="Visão computacional"
-          title="Da imagem ao resultado com YOLO."
-          text="O modelo YOLO (You Only Look Once) localiza os cachos na imagem capturada pelo sensor e classifica o que vê em uma única passada — rápido o suficiente para acompanhar o ritmo do campo."
+          title="Da imagem ao resultado."
+          text="Cada imagem é analisada no servidor: a região do cacho é localizada, anomalias visuais são medidas e o resultado é classificado. Com um modelo YOLO treinado, a variedade e as anomalias passam a ser detectadas pelo modelo."
         />
         <div className="yolo-grid" ref={ref}>
           <Reveal>
             <div className="yolo-io-label">
-              <Image /> Entrada · imagem do sensor
+              <Image /> Entrada · imagem do cacho
             </div>
             <div className="yolo-input">
-              {inView && (
-                <GrapeScene
-                  className="scene"
-                  seed={sample.imageSeed}
-                  varietyId={sample.varietyId}
-                  detections={sample.detections}
-                  capturedAt={sample.capturedAt}
-                  sensorId={sample.sensorId}
-                  block={sample.block}
-                  hud
-                  animateBoxes
-                />
-              )}
+              {inView && <GrapeScene className="scene" seed={ex.seed} varietyId={ex.varietyId} detections={ex.detections} animateBoxes title="Ilustração de um cacho com a área detectada" />}
+              <span className="illustration-tag">Ilustração</span>
             </div>
           </Reveal>
           <div className="yolo-arrow">
             <div className="kpi-icon">
               <ArrowRight />
             </div>
-            YOLO
+            Análise
           </div>
           <Reveal delay={150}>
             <div className="yolo-io-label">
-              <Sparkles /> Saída · resultado da análise
+              <Sparkles /> Saída · formato do resultado
             </div>
-            {inView && <YoloResult reading={{ ...sample, confidence: 0.94 }} animate />}
+            <div className="yolo-output" aria-label="Exemplo do formato do resultado">
+              <div className="yolo-output-head mono">exemplo ilustrativo</div>
+              <dl>
+                {rows.map(([k, v, q]) => (
+                  <div key={k}>
+                    <dt>{k}:</dt>
+                    <dd className={q ? `tone-${q}` : ''}>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </Reveal>
         </div>
         <div className="detect-list">
@@ -337,11 +338,8 @@ export function YoloShowcase() {
 
 /* ------------------------- Preview da plataforma ------------------------- */
 export function PlatformPreview() {
-  const { sensors, readings, now } = useData();
-  const recent = filterReadings(readings, { period: '14' }, now);
-  const counts = countByQuality(recent);
-  const [start, end] = periodRange({ period: '14' }, now);
-  const days = groupByDay(recent, start, end);
+  const overview = usePublicOverview();
+  const o = overview.data;
   const questions = [
     'Onde estão os sensores?',
     'Quantas análises foram feitas?',
@@ -354,7 +352,7 @@ export function PlatformPreview() {
     <section className="section section-rose">
       <div className="container preview">
         <div>
-          <SectionHead eyebrow="Plataforma" title="Tudo o que acontece no vinhedo, em um só painel." text="Indicadores, mapa, histórico e alertas organizados para responder rapidamente às perguntas do dia a dia:" />
+          <SectionHead eyebrow="Plataforma" title="Tudo o que acontece no vinhedo, em um só painel." text="Indicadores, mapa, histórico, importação de dados e alertas organizados para responder às perguntas do dia a dia:" />
           <Reveal>
             <ul className="questions">
               {questions.map((q) => (
@@ -363,26 +361,31 @@ export function PlatformPreview() {
                 </li>
               ))}
             </ul>
-            <Link to="/dashboard" className="btn btn-primary btn-lg">
+            <Link to="/login" className="btn btn-primary btn-lg">
               Acessar plataforma <ArrowRight className="arrow" />
             </Link>
           </Reveal>
         </div>
         <Reveal className="preview-board" delay={120}>
-          <div className="kpi-grid">
-            <KpiCard icon={<Cpu />} label="Sensores ativos" value={sensors.filter((s) => s.status !== 'offline').length} total={String(sensors.length)} />
-            <KpiCard icon={<ScanSearch />} label="Análises (14 dias)" value={counts.total} />
-            <KpiCard icon={<Gauge />} label="Qualidade geral" value={counts.total ? (counts.boa / counts.total) * 100 : 0} suffix="%" accent="good" />
-            <KpiCard icon={<Sparkles />} label="Confiança média" value={avgConfidence(recent) * 100} decimals={1} suffix="%" />
-          </div>
           <div className="card card-pad">
-            <div className="card-title">Evolução das classificações</div>
-            <div className="card-sub" style={{ marginBottom: 12 }}>
-              % por dia · últimos 14 dias
+            <div className="card-title">Números da plataforma</div>
+            <div className="card-sub" style={{ marginBottom: 16 }}>
+              Dados agregados em tempo real · últimos 30 dias
             </div>
-            <div className="chart-box sm">
-              <QualityEvolutionChart days={days} />
-            </div>
+            {o ? (
+              o.analyses30d === 0 && o.sensorsTotal === 0 ? (
+                <p className="muted">A plataforma ainda não recebeu sensores nem análises. Os números aparecem aqui assim que os primeiros dados chegarem.</p>
+              ) : (
+                <div className="kpi-grid">
+                  <KpiCard icon={<Cpu />} label="Sensores comunicando" value={o.sensorsOnline} total={String(o.sensorsTotal)} />
+                  <KpiCard icon={<ScanSearch />} label="Análises" value={o.analyses30d} foot={o.lastAnalysisAt ? `última ${formatRelative(o.lastAnalysisAt)}` : undefined} />
+                  <KpiCard icon={<Gauge />} label="Qualidade (Boa)" value={o.qualityRatio30d != null ? o.qualityRatio30d * 100 : null} decimals={1} suffix="%" accent="good" />
+                  <KpiCard icon={<Sparkles />} label="Confiança média" value={o.avgConfidence30d != null ? o.avgConfidence30d * 100 : null} decimals={1} suffix="%" accent="neutral" />
+                </div>
+              )
+            ) : (
+              <p className="muted">{overview.isError ? 'Não foi possível consultar a API agora.' : 'Carregando…'}</p>
+            )}
           </div>
         </Reveal>
       </div>
@@ -437,14 +440,14 @@ export function ValeSection({ id = 'vale' }: { id?: string }) {
     <section className="section section-rose" id={id}>
       <div className="container vale">
         <div className="vale-copy">
-          <SectionHead eyebrow="Projeto Integrador" title="OSAIS no Vale do São Francisco." />
+          <SectionHead eyebrow="Projeto Integrador" title="OASIS no Vale do São Francisco." />
           <Reveal>
             <p>
               O Submédio do Vale do São Francisco, na divisa entre Pernambuco e Bahia, é um dos principais polos de fruticultura irrigada do país e referência na produção de uvas —
               de mesa e para vinhos tropicais. O clima semiárido, a alta luminosidade e a irrigação permitem mais de uma safra por ano.
             </p>
             <p>
-              A OSAIS está inserida no Projeto Integrador <strong>“Inteligência de Dados no Vale do São Francisco”</strong> e representa a <strong>camada de aquisição, processamento e geração de dados de origem</strong>: os sensores coletam informações do ambiente real que podem alimentar uma arquitetura maior.
+              A OASIS está inserida no Projeto Integrador <strong>“Inteligência de Dados no Vale do São Francisco”</strong> e representa a <strong>camada de aquisição, processamento e geração de dados de origem</strong>: os sensores coletam informações do ambiente real que podem alimentar uma arquitetura maior.
             </p>
           </Reveal>
         </div>
@@ -462,7 +465,7 @@ export function ValeSection({ id = 'vale' }: { id?: string }) {
           </div>
           <div className="stackup-base">
             <strong>
-              <Grape /> OSAIS — dados de origem
+              <Grape /> OASIS — dados de origem
             </strong>
             <span>Sensores IoT + visão computacional no vinhedo: imagens, leituras e classificações que abastecem as demais camadas.</span>
           </div>
@@ -501,7 +504,7 @@ export function Sustainability() {
         <Reveal className="notice" style={{ marginTop: 28 }}>
           <Leaf />
           <span>
-            A OSAIS é uma <strong>ferramenta de apoio à tomada de decisão</strong>. Seus resultados devem ser interpretados em conjunto com a avaliação técnica da equipe e, sozinhos,
+            A OASIS é uma <strong>ferramenta de apoio à tomada de decisão</strong>. Seus resultados devem ser interpretados em conjunto com a avaliação técnica da equipe e, sozinhos,
             não garantem a sustentabilidade da produção.
           </span>
         </Reveal>
@@ -526,7 +529,7 @@ export function TechStack({ id = 'tecnologias' }: { id?: string }) {
   return (
     <section className="section section-rose" id={id}>
       <div className="container">
-        <SectionHead eyebrow="Tecnologias" title="Uma pilha pronta para o campo real." text="O protótipo funciona com dados simulados e está preparado para conectar ESP32 + câmera real, API, banco de dados e um modelo YOLO treinado com imagens reais." />
+        <SectionHead eyebrow="Tecnologias" title="Uma pilha pronta para o campo real." text="Firmware para ESP32-CAM, gateway de edge com fila offline, API com análise de imagem, importação de dados e banco relacional — prontos para receber um modelo YOLO treinado com imagens do próprio vinhedo." />
         <div className="tech-grid">
           {TECH.map((t, i) => (
             <Reveal key={t.title} delay={i * 50} className="tech-card">
@@ -576,17 +579,17 @@ export function FinalCta() {
       <div className="container" style={{ position: 'relative' }}>
         <Reveal>
           <span className="eyebrow" style={{ color: 'var(--rose-300)' }}>
-            OSAIS
+            OASIS
           </span>
           <h2 className="display" style={{ marginTop: 16 }}>
             Do campo aos dados.
           </h2>
           <p>
-            A OSAIS conecta observação agroambiental, sensores IoT e Inteligência Artificial para transformar imagens e dados do cultivo em informações inteligentes para apoiar
+            A OASIS conecta observação agroambiental, sensores IoT e Inteligência Artificial para transformar imagens e dados do cultivo em informações inteligentes para apoiar
             decisões mais eficientes e sustentáveis.
           </p>
           <Link to="/dashboard" className="btn btn-lg btn-light">
-            Explorar a OSAIS <ArrowRight className="arrow" />
+            Explorar a OASIS <ArrowRight className="arrow" />
           </Link>
         </Reveal>
       </div>

@@ -8,25 +8,25 @@ const ROADMAP = [
     icon: Cpu,
     title: 'ESP32 + câmera real',
     repo: 'Vinicola-back · iot/esp32-cam',
-    text: 'Firmware que captura a imagem em intervalos programados e a envia via HTTP (multipart) ou MQTT com o token do dispositivo.',
+    text: 'Firmware que captura a imagem em intervalos programados e a envia via HTTP (multipart) ou MQTT com o token individual do dispositivo, junto com bateria, sinal e — com DHT22 — temperatura e umidade.',
   },
   {
     icon: Server,
-    title: 'API OSAIS (FastAPI)',
+    title: 'API OASIS (FastAPI)',
     repo: 'Vinicola-back · app/',
-    text: 'Endpoints de ingestão, sensores, leituras e autenticação — com o mesmo contrato JSON usado por este frontend.',
+    text: 'Ingestão e análise de imagens, sensores, medições ambientais, importação de arquivos, indicadores, usuários e auditoria — com o mesmo contrato JSON usado por este frontend.',
   },
   {
     icon: Database,
     title: 'Banco de dados',
     repo: 'Vinicola-bd',
-    text: 'Esquemas PostgreSQL e MySQL, visões para os indicadores do dashboard e estrutura equivalente para Firebase.',
+    text: 'SQLite, PostgreSQL ou MySQL/MariaDB, com visões analíticas para relatórios e Data Science.',
   },
   {
     icon: BrainCircuit,
     title: 'Modelo YOLO treinado',
     repo: 'Vinicola-back · ml/',
-    text: 'Pipeline de treino com imagens reais das variedades. Basta publicar os pesos e definir OSAIS_DETECTOR=yolo para trocar a simulação pela inferência real.',
+    text: 'Hoje as imagens são analisadas por segmentação de cor. Com imagens anotadas do próprio vinhedo, o pipeline de treino gera os pesos YOLO; ao colocá-los em models/oasis-grapes.pt, a API passa a usá-los automaticamente.',
   },
 ];
 
@@ -34,7 +34,7 @@ export default function About() {
   return (
     <>
       <PageHero
-        eyebrow="Sobre a OSAIS"
+        eyebrow="Sobre a OASIS"
         title="Observação Agroambiental Sensorizada, Inteligente e Sustentável"
         description="Uma solução de IoT, Inteligência Artificial e visão computacional para monitoramento e classificação de uvas — do vinhedo ao dashboard."
       />
@@ -45,8 +45,8 @@ export default function About() {
         <div className="container">
           <SectionHead
             eyebrow="Preparada para o campo real"
-            title="Do protótipo à operação."
-            text="Este protótipo é totalmente demonstrável sem sensores físicos. A arquitetura já está pronta para conectar os componentes reais:"
+            title="Do campo à operação."
+            text="Os componentes que levam os dados do vinhedo até o painel:"
           />
           <div className="grid-2">
             {ROADMAP.map((r, i) => (

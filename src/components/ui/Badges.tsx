@@ -1,6 +1,6 @@
-import { CircleAlert, CircleCheck, CircleOff, OctagonAlert, TriangleAlert } from 'lucide-react';
-import { QUALITY_LABEL, SENSOR_STATUS_LABEL, STAGE_LABEL } from '../../data/labels';
-import type { Classification, PipelineStage, Quality, SensorStatus, VarietyId } from '../../data/types';
+import { CircleAlert, CircleCheck, CircleOff, CirclePause, Database, FileUp, FlaskConical, OctagonAlert, Radio, TriangleAlert, Upload } from 'lucide-react';
+import { QUALITY_LABEL, SENSOR_STATUS_LABEL, SOURCE_LABEL } from '../../data/labels';
+import type { Classification, Quality, ReadingSource, SensorStatus, VarietyId } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
 
 const QUALITY_ICON = { boa: CircleCheck, atencao: TriangleAlert, critica: OctagonAlert } as const;
@@ -26,45 +26,39 @@ export function ClassificationBadge({ value }: { value: Classification }) {
   return <QualityBadge quality={CLASS_QUALITY[value]} label={value} />;
 }
 
-export function SensorStatusBadge({ status }: { status: SensorStatus }) {
-  if (status === 'offline')
-    return (
-      <span className="badge badge-offline">
-        <CircleOff aria-hidden="true" />
-        {SENSOR_STATUS_LABEL.offline}
-      </span>
-    );
-  if (status === 'atencao')
-    return (
-      <span className="badge badge-atencao">
-        <CircleAlert aria-hidden="true" />
-        {SENSOR_STATUS_LABEL.atencao}
-      </span>
-    );
+export function SensorStatusBadge({ status, title }: { status: SensorStatus; title?: string }) {
+  const map = {
+    online: { cls: 'badge-online', icon: <span className="badge-dot live" aria-hidden="true" /> },
+    atencao: { cls: 'badge-atencao', icon: <CircleAlert aria-hidden="true" /> },
+    offline: { cls: 'badge-offline', icon: <CircleOff aria-hidden="true" /> },
+    inativo: { cls: 'badge-neutral', icon: <CirclePause aria-hidden="true" /> },
+  }[status];
   return (
-    <span className="badge badge-online">
-      <span className="badge-dot live" aria-hidden="true" />
-      {SENSOR_STATUS_LABEL.online}
+    <span className={`badge ${map.cls}`} title={title}>
+      {map.icon}
+      {SENSOR_STATUS_LABEL[status]}
     </span>
   );
 }
 
-export function StageBadge({ stage }: { stage: PipelineStage }) {
-  const done = stage === 'concluida';
+const SOURCE_ICON = { sensor: Radio, upload: Upload, importacao: FileUp, demonstracao: FlaskConical } as const;
+
+export function SourceBadge({ source }: { source: ReadingSource }) {
+  const Icon = SOURCE_ICON[source] ?? Database;
   return (
-    <span className={`badge ${done ? 'badge-boa' : 'badge-neutral'}`}>
-      {done ? <CircleCheck aria-hidden="true" /> : <span className="spinner" style={{ width: 12, height: 12 }} aria-hidden="true" />}
-      {STAGE_LABEL[stage]}
+    <span className={`badge ${source === 'demonstracao' ? 'badge-demo' : 'badge-neutral'}`} title={source === 'demonstracao' ? 'Dado sintético de demonstração' : undefined}>
+      <Icon aria-hidden="true" />
+      {SOURCE_LABEL[source] ?? source}
     </span>
   );
 }
 
-export function VarietyTag({ id }: { id: VarietyId }) {
-  const v = VARIETY_BY_ID[id];
+export function VarietyTag({ id }: { id: VarietyId | string }) {
+  const v = VARIETY_BY_ID[id as VarietyId];
   return (
     <span className="variety-tag">
-      <i style={{ background: v.chartColor }} aria-hidden="true" />
-      {v.name}
+      <i style={{ background: v?.chartColor ?? 'var(--ink-300)' }} aria-hidden="true" />
+      {v?.name ?? id}
     </span>
   );
 }

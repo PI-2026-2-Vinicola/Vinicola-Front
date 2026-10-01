@@ -1,4 +1,4 @@
-/** Gerador pseudoaleatório determinístico (mulberry32) — garante dados simulados reproduzíveis. */
+/** Gerador pseudoaleatório determinístico (mulberry32) — usado apenas para desenhar as ilustrações dos cachos de forma estável. */
 export function mulberry32(seed: number) {
   let a = seed >>> 0;
   return () => {

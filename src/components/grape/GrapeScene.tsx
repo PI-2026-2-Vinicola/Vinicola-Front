@@ -1,5 +1,4 @@
 import { memo, useId, useMemo, type ReactElement } from 'react';
-import { ANOMALY_LABELS, clusterHalfWidth } from '../../data/generate';
 import type { Detection, VarietyId } from '../../data/types';
 import { GRAPE_TONES, VARIETY_BY_ID } from '../../data/varieties';
 import { formatTime } from '../../lib/format';
@@ -32,7 +31,13 @@ interface Berry {
   seed: number;
 }
 
-const SEVERE = new Set(ANOMALY_LABELS.critica);
+const SEVERE = new Set(['podridao', 'baga_murcha', 'lesao']);
+
+/** Largura relativa do cacho em cada altura (forma cônica típica). */
+function clusterHalfWidth(v: number): number {
+  if (v < 0.22) return 0.62 + v * 1.7;
+  return Math.max(0.08, 1 - ((v - 0.22) / 0.78) * 0.9);
+}
 
 function buildBerries(rng: Rng, box: Detection['box'], varietyId: VarietyId, anomalies: Detection[]): Berry[] {
   const [bx, by, bw, bh] = [box[0] * W, box[1] * H, box[2] * W, box[3] * H];
@@ -304,7 +309,7 @@ function GrapeSceneInner(props: GrapeSceneProps) {
             ESP32-CAM · 1600×1200 · JPEG
           </text>
           <text x={W - 20} y={H - 17} opacity="0.75" textAnchor="end">
-            OSAIS
+            OASIS
           </text>
         </g>
       )}

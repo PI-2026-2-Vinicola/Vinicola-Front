@@ -1,24 +1,26 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MapPinOff } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { MapContainer, Marker, Polygon, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { Link } from 'react-router-dom';
-import { QUALITY_LABEL } from '../../data/labels';
-import { BLOCKS } from '../../data/sensors';
-import type { Reading, Sensor } from '../../data/types';
+import type { Sensor } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
-import { formatDateTime, formatRelative } from '../../lib/format';
+import { formatDateTime, formatPct, formatRelative } from '../../lib/format';
 import { SensorStatusBadge } from '../ui/Badges';
+import { EmptyState } from '../ui/States';
 
 const ICON_SVG: Record<Sensor['status'], string> = {
   online:
     '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>',
-  atencao:
-    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 8v5"/><path d="M12 17h.01"/></svg>',
-  offline:
-    '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  atencao: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 8v5"/><path d="M12 17h.01"/></svg>',
+  offline: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  inativo: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 6v12M15 6v12"/></svg>',
 };
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+}
 
 function markerIcon(sensor: Sensor, selected: boolean) {
   return L.divIcon({
@@ -27,69 +29,61 @@ function markerIcon(sensor: Sensor, selected: boolean) {
     iconAnchor: [22, 22],
     popupAnchor: [0, -20],
     html: `<div class="map-marker map-marker--${sensor.status}${selected ? ' is-selected' : ''}">
-      ${sensor.status === 'online' ? '<span class="map-marker-pulse"></span>' : ''}
       <span class="map-marker-dot">${ICON_SVG[sensor.status]}</span>
-      <span class="map-marker-label">${sensor.id}</span>
+      <span class="map-marker-label">${escapeHtml(sensor.id)}</span>
     </div>`,
   });
 }
 
-function FlyTo({ target }: { target?: Sensor }) {
+function FitAndFly({ sensors, target }: { sensors: Sensor[]; target?: Sensor }) {
   const map = useMap();
+  const key = sensors.map((s) => `${s.id}:${s.lat}:${s.lng}`).join('|');
   useEffect(() => {
-    if (target) map.flyTo([target.lat, target.lng], Math.max(map.getZoom(), 17), { duration: 0.8 });
+    if (!sensors.length) return;
+    if (sensors.length === 1) map.setView([sensors[0].lat!, sensors[0].lng!], 17);
+    else map.fitBounds(L.latLngBounds(sensors.map((s) => [s.lat!, s.lng!] as [number, number])), { padding: [40, 40], maxZoom: 18 });
+  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (target?.hasValidLocation) map.flyTo([target.lat!, target.lng!], Math.max(map.getZoom(), 17), { duration: 0.6 });
   }, [target, map]);
   return null;
 }
 
+const TILES = {
+  mapa: { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', attribution: '&copy; OpenStreetMap &copy; CARTO' },
+  satelite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attribution: 'Imagens &copy; Esri' },
+};
+
 interface SensorMapProps {
   sensors: Sensor[];
-  lastReadings: Record<string, Reading | undefined>;
   selectedId?: string;
   onSelect?: (id: string) => void;
   height?: number;
-  compact?: boolean;
 }
 
-const FARM_BOUNDS = L.latLngBounds(BLOCKS.flatMap((b) => b.polygon));
-
-const TILES = {
-  mapa: {
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-  },
-  satelite: {
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: 'Imagens &copy; Esri',
-  },
-};
-
-export function SensorMap({ sensors, lastReadings, selectedId, onSelect, height = 460, compact = false }: SensorMapProps) {
+/** Mapa com os sensores que têm coordenadas válidas; os demais são listados abaixo do mapa. */
+export function SensorMap({ sensors, selectedId, onSelect, height = 420 }: SensorMapProps) {
   const [layer, setLayer] = useState<keyof typeof TILES>('mapa');
-  const selected = useMemo(() => sensors.find((s) => s.id === selectedId), [sensors, selectedId]);
-  const blockVariety = useMemo(() => Object.fromEntries(sensors.map((s) => [s.block, VARIETY_BY_ID[s.varietyId]])), [sensors]);
+  const located = useMemo(() => sensors.filter((s) => s.hasValidLocation), [sensors]);
+  const missing = sensors.length - located.length;
+  const selected = useMemo(() => located.find((s) => s.id === selectedId), [located, selectedId]);
+
+  if (!located.length)
+    return (
+      <div className="map-empty" style={{ minHeight: Math.min(height, 260) }}>
+        <EmptyState icon={<MapPinOff aria-hidden="true" />} title={sensors.length ? 'Nenhum sensor com coordenadas' : 'Nenhum sensor cadastrado'}>
+          {sensors.length ? 'Informe latitude e longitude no cadastro dos sensores para exibi-los no mapa.' : 'Cadastre os sensores para acompanhar sua localização.'}
+        </EmptyState>
+      </div>
+    );
 
   return (
-    <div className="map-shell" style={{ height }}>
-      <MapContainer bounds={FARM_BOUNDS} boundsOptions={{ padding: compact ? [28, 28] : [40, 40] }} scrollWheelZoom={false} className="map" attributionControl>
-        <TileLayer key={layer} url={TILES[layer].url} attribution={TILES[layer].attribution} maxZoom={19} />
-        {BLOCKS.map((b) => {
-          const v = blockVariety[b.name];
-          return (
-            <Polygon key={b.id} positions={b.polygon} pathOptions={{ color: '#a3325a', weight: 1.2, opacity: 0.7, fillColor: '#f0b9cb', fillOpacity: layer === 'satelite' ? 0.18 : 0.28 }}>
-              {!compact && (
-                <Tooltip direction="center" permanent className="block-label">
-                  {b.name}
-                  {v ? ` · ${v.name}` : ''}
-                </Tooltip>
-              )}
-            </Polygon>
-          );
-        })}
-        {sensors.map((s) => {
-          const last = lastReadings[s.id];
-          return (
-            <Marker key={s.id} position={[s.lat, s.lng]} icon={markerIcon(s, s.id === selectedId)} eventHandlers={{ click: () => onSelect?.(s.id) }}>
+    <div>
+      <div className="map-shell" style={{ height }}>
+        <MapContainer center={[located[0].lat!, located[0].lng!]} zoom={16} scrollWheelZoom={false} className="map" attributionControl>
+          <TileLayer key={layer} url={TILES[layer].url} attribution={TILES[layer].attribution} maxZoom={19} />
+          {located.map((s) => (
+            <Marker key={s.id} position={[s.lat!, s.lng!]} icon={markerIcon(s, s.id === selectedId)} eventHandlers={{ click: () => onSelect?.(s.id) }}>
               <Popup className="sensor-popup" closeButton={false}>
                 <div className="popup">
                   <div className="row-between">
@@ -97,55 +91,57 @@ export function SensorMap({ sensors, lastReadings, selectedId, onSelect, height 
                     <SensorStatusBadge status={s.status} />
                   </div>
                   <dl>
-                    <dt>ID</dt>
+                    <dt>Código</dt>
                     <dd className="mono">{s.id}</dd>
-                    <dt>Localização</dt>
-                    <dd>{s.location}</dd>
+                    <dt>Local</dt>
+                    <dd>
+                      {s.block} · {s.location}
+                    </dd>
+                    <dt>Variedade</dt>
+                    <dd>{VARIETY_BY_ID[s.varietyId]?.name ?? s.varietyId}</dd>
                     <dt>Última leitura</dt>
-                    <dd>{last ? `${formatDateTime(last.capturedAt)} · ${QUALITY_LABEL[last.quality]}` : '—'}</dd>
+                    <dd>{s.lastReadingAt ? formatDateTime(s.lastReadingAt) : 'nenhuma'}</dd>
+                    <dt>% Boa</dt>
+                    <dd>{formatPct(s.qualityRatio)}</dd>
                     <dt>Comunicação</dt>
                     <dd>{formatRelative(s.lastCommunication)}</dd>
                   </dl>
+                  <p className="popup-reason">{s.statusReason}</p>
                   <Link to={`/sensores/${s.id}`} className="link">
                     Ver detalhes <ArrowRight />
                   </Link>
                 </div>
               </Popup>
             </Marker>
-          );
-        })}
-        <FlyTo target={selected} />
-      </MapContainer>
-      <div className="map-controls">
-        <div className="segmented">
-          <button aria-pressed={layer === 'mapa'} onClick={() => setLayer('mapa')}>
-            Mapa
-          </button>
-          <button aria-pressed={layer === 'satelite'} onClick={() => setLayer('satelite')}>
-            Satélite
-          </button>
+          ))}
+          <FitAndFly sensors={located} target={selected} />
+        </MapContainer>
+        <div className="map-controls">
+          <div className="segmented">
+            <button aria-pressed={layer === 'mapa'} onClick={() => setLayer('mapa')}>
+              Mapa
+            </button>
+            <button aria-pressed={layer === 'satelite'} onClick={() => setLayer('satelite')}>
+              Satélite
+            </button>
+          </div>
+        </div>
+        <div className="map-legend">
+          {(['online', 'atencao', 'offline', 'inativo'] as const).map((st) => (
+            <span key={st}>
+              <span className={`map-marker map-marker--${st} mini`}>
+                <span className="map-marker-dot" />
+              </span>
+              {{ online: 'Online', atencao: 'Atenção', offline: 'Offline', inativo: 'Inativo' }[st]}
+            </span>
+          ))}
         </div>
       </div>
-      <div className="map-legend">
-        <span>
-          <span className="map-marker map-marker--online mini">
-            <span className="map-marker-dot" />
-          </span>
-          Ativo
-        </span>
-        <span>
-          <span className="map-marker map-marker--atencao mini">
-            <span className="map-marker-dot" />
-          </span>
-          Atenção
-        </span>
-        <span>
-          <span className="map-marker map-marker--offline mini">
-            <span className="map-marker-dot" />
-          </span>
-          Offline
-        </span>
-      </div>
+      {missing > 0 && (
+        <p className="map-note">
+          <MapPinOff aria-hidden="true" /> {missing} sensor(es) sem coordenadas não aparecem no mapa.
+        </p>
+      )}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { useData } from '../../context/DataContext';
 
 interface PageHeroProps {
   eyebrow: string;
@@ -12,7 +11,6 @@ interface PageHeroProps {
 }
 
 export function PageHero({ eyebrow, title, description, actions, crumbs }: PageHeroProps) {
-  const { source } = useData();
   return (
     <section className="page-hero">
       <div className="container">
@@ -31,13 +29,7 @@ export function PageHero({ eyebrow, title, description, actions, crumbs }: PageH
           <h1 className="display">{title}</h1>
           {description && <p>{description}</p>}
         </div>
-        <div className="page-hero-actions" style={{ animation: 'fadeUp .7s .1s var(--ease) both' }}>
-          {actions}
-          <span className="demo-ribbon" title={source === 'demo' ? 'Dados simulados gerados no navegador' : 'Dados da API OSAIS'}>
-            <span className="badge-dot live" />
-            {source === 'demo' ? 'Modo demonstração' : 'Conectado à API'}
-          </span>
-        </div>
+        {actions && <div className="page-hero-actions">{actions}</div>}
       </div>
     </section>
   );

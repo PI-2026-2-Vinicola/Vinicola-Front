@@ -1,7 +1,7 @@
 import type { Variety, VarietyId } from './types';
 
 /**
- * Biblioteca educacional das variedades cultivadas na propriedade demonstrativa.
+ * Biblioteca educacional das variedades do catálogo OASIS (mesmos identificadores da API).
  * As cores `chartColor` formam uma paleta categórica validada para daltonismo
  * (protanopia/deuteranopia) e contraste ≥ 3:1 sobre fundo branco.
  */
