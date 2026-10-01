@@ -174,7 +174,8 @@ export default function Analyses() {
   };
   return (
     <div className="page">
-      <PageHeader title="Análises" description="Envie imagens para análise e acompanhe os resultados processados pela plataforma." />
+      <PageHeader eyebrow="Inteligência de dados"
+        title="Análises" description="Envie imagens para análise e acompanhe os resultados processados pela plataforma." />
       <div className="tabs" role="tablist">
         <button role="tab" aria-selected={tab === 'enviar'} onClick={() => setTab('enviar')}>
           <ImageUp /> Enviar imagem

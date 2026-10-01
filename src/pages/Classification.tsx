@@ -77,6 +77,7 @@ export default function Classification() {
   return (
     <div className="page">
       <PageHeader
+        eyebrow="Resultados por variedade"
         title="Classificação das uvas"
         description="Resultado das análises por variedade: quantidade, distribuição das classificações, confiança e maturação."
         actions={

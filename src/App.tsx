@@ -1,9 +1,9 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
-import { AppShell } from './components/layout/AppShell';
 import { Footer } from './components/layout/Footer';
 import { RequireAccess, RequireAuth } from './components/layout/Guards';
 import { Navbar } from './components/layout/Navbar';
+import { PageShell } from './components/layout/PageHeader';
 import { LoadingBlock } from './components/ui/States';
 import Home from './pages/Home';
 
@@ -54,14 +54,26 @@ function PublicLayout() {
   );
 }
 
-/** Páginas da plataforma: sessão obrigatória + menu lateral. */
+/** Páginas da plataforma: sessão obrigatória, mesmo menu superior e rodapé da página inicial. */
 function PrivateLayout() {
   return (
-    <RequireAuth>
-      <Suspense fallback={<LoadingBlock height={480} />}>
-        <AppShell />
-      </Suspense>
-    </RequireAuth>
+    <>
+      <Navbar />
+      <main className="platform">
+        <RequireAuth>
+          <Suspense
+            fallback={
+              <PageShell>
+                <LoadingBlock height={360} />
+              </PageShell>
+            }
+          >
+            <Outlet />
+          </Suspense>
+        </RequireAuth>
+      </main>
+      <Footer />
+    </>
   );
 }
 

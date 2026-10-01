@@ -5,12 +5,18 @@ import { useAuth } from '../../context/AuthContext';
 import { ROLE_LABEL } from '../../data/labels';
 import { ACCESS, homeFor, type Area } from '../../services/api';
 import { LoadingBlock } from '../ui/States';
+import { PageHeader, PageShell } from './PageHeader';
 
 /** Exige sessão válida (o token é conferido na API ao abrir a aplicação). */
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { status } = useAuth();
   const location = useLocation();
-  if (status === 'checking') return <LoadingBlock height={480} label="Verificando sessão…" />;
+  if (status === 'checking')
+    return (
+      <PageShell>
+        <LoadingBlock height={360} label="Verificando sessão…" />
+      </PageShell>
+    );
   if (status === 'anonymous') return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   return <>{children}</>;
 }
@@ -22,6 +28,7 @@ export function RequireAccess({ area, children }: { area: Area; children: ReactN
   if (!can(area))
     return (
       <div className="page">
+        <PageHeader eyebrow="Acesso restrito" title="Área não disponível" />
         <div className="card restricted">
           <div className="kpi-icon">
             <Lock />

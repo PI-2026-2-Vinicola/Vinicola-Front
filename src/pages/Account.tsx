@@ -36,7 +36,8 @@ export default function Account() {
   };
   return (
     <div className="page">
-      <PageHeader title="Minha conta" />
+      <PageHeader eyebrow="Perfil e segurança"
+        title="Minha conta" />
       <div className="grid-2">
         <section className="card card-pad">
           <h3 className="card-title">Perfil</h3>

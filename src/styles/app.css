@@ -1,310 +1,141 @@
 /* =============================================================================
-   Plataforma (área autenticada): menu lateral, cabeçalho de página e componentes
-   de dados. Visual sóbrio — superfícies brancas, bordas finas, sem gradientes.
+   Plataforma (área autenticada): mesmo menu superior, faixa de cabeçalho e
+   rodapé da página inicial; componentes de dados ajustados para leitura.
    ============================================================================= */
 
-.app {
-  --sidebar-w: 248px;
-  --app-bg: #f6f3f4;
+.platform {
   min-height: 100vh;
-  background: var(--app-bg);
-}
-
-body:has(.app) {
-  background: var(--app-bg);
-}
-
-/* ------------------------------------------------------------------ menu lateral */
-.sidebar {
-  position: fixed;
-  inset: 0 auto 0 0;
-  z-index: 40;
-  width: var(--sidebar-w);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 18px 14px 14px;
-  background: var(--white);
-  border-right: 1px solid var(--line);
-  overflow-y: auto;
-}
-
-.sidebar-brand {
-  padding: 4px 8px 14px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 6px;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  flex: 1;
-}
-
-.sidebar-section {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sidebar-title {
-  padding: 0 10px 4px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-400);
-}
-
-.sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 38px;
-  padding: 0 10px;
-  border-radius: 9px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink-700);
-  transition:
-    background 0.15s,
-    color 0.15s;
-  width: 100%;
-  text-align: left;
-}
-
-.sidebar-link svg {
-  width: 18px;
-  height: 18px;
-  color: var(--ink-400);
-  flex: none;
-}
-
-.sidebar-link:hover {
-  background: var(--surface-2);
-  color: var(--ink-900);
-}
-
-.sidebar-link.active {
-  background: var(--rose-100);
-  color: var(--wine-700);
-  font-weight: 600;
-}
-
-.sidebar-link.active svg {
-  color: var(--wine-600);
-}
-
-.sidebar-user {
-  border-top: 1px solid var(--line);
-  padding-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sidebar-account {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 10px;
-}
-
-.sidebar-account:hover,
-.sidebar-account.active {
-  background: var(--surface-2);
-}
-
-.sidebar-account > svg {
-  width: 16px;
-  height: 16px;
-  color: var(--ink-400);
-  margin-left: auto;
-}
-
-.sidebar-account-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.3;
-}
-
-.sidebar-account-text strong {
-  font-size: 13.5px;
-  color: var(--ink-900);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar-account-text span {
-  font-size: 12px;
-  color: var(--ink-500);
-}
-
-.app-topbar {
-  display: none;
-}
-
-.app-main {
-  margin-left: var(--sidebar-w);
-  min-width: 0;
-}
-
-.sidebar-drawer {
-  position: fixed;
-  inset: 0;
-  z-index: 150;
-  background: rgba(31, 26, 29, 0.4);
-  animation: fadeIn 0.2s ease both;
-}
-
-.sidebar-drawer .sidebar {
-  box-shadow: var(--shadow-lg);
-  animation: slideIn 0.25s var(--ease) both;
-}
-
-.sidebar-close {
-  position: absolute;
-  top: 14px;
-  right: 10px;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(-24px);
-    opacity: 0;
-  }
-}
-
-@media (max-width: 1024px) {
-  .app > .sidebar {
-    display: none;
-  }
-
-  .app-main {
-    margin-left: 0;
-  }
-
-  .app-topbar {
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    height: 58px;
-    padding: 0 12px;
-    background: var(--white);
-    border-bottom: 1px solid var(--line);
-  }
+  background: var(--bg);
+  overflow-x: clip;
 }
 
 /* ------------------------------------------------------------------ página */
 .page {
-  max-width: 1440px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 28px 32px 64px;
+  padding: 0 var(--gutter) 96px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-@media (max-width: 720px) {
-  .page {
-    padding: 18px 16px 48px;
-    gap: 16px;
+/* Faixa vinho de largura total (estilo landing) sob o menu transparente */
+.page > .page-hero--app {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: calc(var(--nav-h) + 40px) 0 104px;
+}
+
+.page-hero--app h1 {
+  font-size: clamp(30px, 3.6vw, 44px);
+  margin-top: 10px;
+}
+
+.page-hero--app .breadcrumb + h1,
+.page-hero--app .page-hero-text > h1:first-child {
+  margin-top: 0;
+}
+
+.page-hero--app p {
+  font-size: 16px;
+  max-width: 720px;
+}
+
+.page-hero-text {
+  min-width: 0;
+  flex: 1 1 420px;
+}
+
+.page-hero--app .page-hero-actions {
+  align-items: center;
+}
+
+/* O primeiro bloco depois da faixa sobe sobre ela, como na página inicial */
+.page > .page-hero--app + * {
+  margin-top: -84px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Controles sobre a faixa escura */
+.page-hero .segmented {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.page-hero .segmented button {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.page-hero .segmented button:hover {
+  color: #fff;
+}
+
+.page-hero .segmented button[aria-pressed='true'] {
+  background: #fff;
+  color: var(--wine-700);
+}
+
+.page-hero .period-dates .muted {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.page-hero .btn-primary {
+  color: var(--wine-800);
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.page-hero .btn-secondary {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: none;
+}
+
+.page-hero .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.page-hero .btn-ghost {
+  color: #fff;
+}
+
+.page-hero .btn-danger-text {
+  color: var(--rose-300);
+}
+
+.page-hero h1 .badge {
+  font-family: var(--font-sans);
+  vertical-align: middle;
+}
+
+/* Menu superior da área logada: mais itens, cabe antes de recolher */
+.nav--app .nav-links a {
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+@media (max-width: 1280px) {
+  .nav--app .nav-links {
+    display: none;
+  }
+  .nav--app .nav-actions {
+    margin-left: auto;
+  }
+  .nav--app .nav-toggle {
+    display: inline-grid;
   }
 }
 
-.page-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px 24px;
-  flex-wrap: wrap;
+.drawer-sep {
+  display: block;
+  height: 1px;
+  margin: 8px 0;
+  background: var(--line);
 }
 
-.page-header h1 {
-  font-size: 26px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-}
-
-.page-header p {
-  margin-top: 6px;
-  color: var(--ink-500);
-  font-size: 14.5px;
-  max-width: 760px;
-}
-
-.page-header .breadcrumb {
-  display: flex;
-  gap: 4px;
-  font-size: 13px;
-  margin-bottom: 6px;
-  color: var(--ink-500);
-}
-
-.page-header .breadcrumb span {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.page-header .breadcrumb a:hover {
-  color: var(--wine-600);
-}
-
-.page-header .breadcrumb svg {
-  width: 14px;
-  height: 14px;
-}
-
-.page-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-/* Ajustes de componentes dentro da plataforma: menos sombra, cantos menores, botão sólido. */
-.app .card {
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(31, 26, 29, 0.04);
-}
-
-.app .card-pad {
-  padding: 20px;
-}
-
-.app .btn {
-  --btn-h: 40px;
-  border-radius: 10px;
-  font-size: 14px;
-  padding: 0 16px;
-}
-
-.app .btn-sm {
-  --btn-h: 32px;
-  font-size: 13px;
-  padding: 0 12px;
-}
-
-.app .btn-primary {
-  background: var(--wine-600);
-  box-shadow: none;
-}
-
-.app .btn-primary:hover {
-  background: var(--wine-700);
-  transform: none;
-  box-shadow: none;
-}
-
-.app .btn:disabled {
+.platform .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -323,28 +154,32 @@ body:has(.app) {
   color: var(--bad-ink);
 }
 
-.app .segmented button {
+.platform .segmented button {
   font-size: 13px;
 }
 
-.app .tabs {
-  background: transparent;
+.page .tabs {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 8px;
+  box-shadow: var(--shadow-sm);
 }
 
-.app .grid-2,
-.app .grid-3,
-.app .grid-main-side,
-.app .map-layout {
+.platform .grid-2,
+.platform .grid-3,
+.platform .grid-main-side,
+.platform .map-layout {
   gap: 20px;
 }
 
 /* ------------------------------------------------------------------ KPIs */
-.app .kpi-grid {
+.platform .kpi-grid {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 14px;
 }
 
-.app .kpi {
+.platform .kpi {
   padding: 16px 18px;
 }
 
@@ -355,7 +190,7 @@ body:has(.app) {
   gap: 8px;
 }
 
-.app .kpi-icon,
+.platform .kpi-icon,
 .kpi-top .kpi-icon {
   width: 30px;
   height: 30px;
@@ -368,7 +203,7 @@ body:has(.app) {
   height: 16px;
 }
 
-.app .kpi-value {
+.platform .kpi-value {
   font-size: 26px;
   margin-top: 8px;
 }
@@ -566,23 +401,23 @@ body:has(.app) {
   width: 150px;
 }
 
-.app .filters {
+.platform .filters {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
 @media (max-width: 1100px) {
-  .app .filters {
+  .platform .filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 560px) {
-  .app .filters {
+  .platform .filters {
     grid-template-columns: 1fr;
   }
-  .app .filters .span-2 {
+  .platform .filters .span-2 {
     grid-column: auto;
   }
 }
@@ -623,12 +458,12 @@ body:has(.app) {
   width: auto;
 }
 
-.app .table-wrap {
+.platform .table-wrap {
   overflow-x: auto;
 }
 
-.app .table th:first-child,
-.app .table th:last-child {
+.platform .table th:first-child,
+.platform .table th:last-child {
   border-radius: 0;
 }
 
@@ -682,7 +517,7 @@ tr.is-muted td {
   color: var(--ink-600);
 }
 
-.app .pagination {
+.platform .pagination {
   border-top: 1px solid var(--line);
   padding: 12px 16px;
 }
@@ -883,7 +718,6 @@ tr.is-muted td {
   margin-bottom: 8px;
 }
 
-.app .modal,
 .modal {
   border-radius: 18px;
 }
@@ -1024,18 +858,18 @@ tr.is-muted td {
   height: 18px;
 }
 
-.app .list-thumb,
+.platform .list-thumb,
 .list-thumb {
   background: var(--surface-2);
 }
 
-.app .reading-image {
+.platform .reading-image {
   background: #1f1a1d;
   border-radius: 12px;
   box-shadow: none;
 }
 
-.app .reading-toggle {
+.platform .reading-toggle {
   bottom: 12px;
 }
 
@@ -1366,20 +1200,20 @@ tr.is-muted td {
   margin-top: 4px;
 }
 
-.app .variety-summary {
+.platform .variety-summary {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
   gap: 20px;
 }
 
 @media (max-width: 1200px) {
-  .app .variety-summary {
+  .platform .variety-summary {
     grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 760px) {
-  .app .variety-summary {
+  .platform .variety-summary {
     grid-template-columns: 1fr;
   }
 }
@@ -1582,20 +1416,20 @@ p.small {
 
 /* Celular: KPIs em duas colunas e controles segmentados roláveis */
 @media (max-width: 560px) {
-  .app .kpi-grid {
+  .platform .kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
-  .app .kpi {
+  .platform .kpi {
     padding: 12px 14px;
   }
 
-  .app .kpi-value {
+  .platform .kpi-value {
     font-size: 21px;
   }
 
-  .app .kpi-label {
+  .platform .kpi-label {
     font-size: 12.5px;
   }
 
@@ -1608,13 +1442,13 @@ p.small {
     max-width: 100%;
   }
 
-  .app .segmented {
+  .platform .segmented {
     max-width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
   }
 
-  .app .segmented button {
+  .platform .segmented button {
     flex: none;
   }
 }

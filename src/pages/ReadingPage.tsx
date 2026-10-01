@@ -3,11 +3,12 @@ import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ReadingDetail } from '../components/analysis/ReadingDetail';
-import { PageHeader } from '../components/layout/PageHeader';
+import { PageHeader, PageShell } from '../components/layout/PageHeader';
 import { Modal } from '../components/ui/Modal';
 import { ErrorState, errorMessage, LoadingBlock } from '../components/ui/States';
 import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
+import { SOURCE_LABEL } from '../data/labels';
 import { VARIETY_BY_ID } from '../data/varieties';
 import { useReading } from '../hooks/queries';
 import { formatDateTime } from '../lib/format';
@@ -35,15 +36,24 @@ export default function ReadingPage() {
   });
 
   if (reading.isError && reading.error instanceof ApiError && reading.error.status === 404) return <NotFound inline title="Leitura não encontrada" back="/historico" />;
-  if (reading.isPending) return <div className="page"><LoadingBlock height={480} /></div>;
-  if (reading.isError) return <div className="page"><ErrorState error={reading.error} onRetry={() => void reading.refetch()} /></div>;
+  if (reading.isPending) return (
+      <PageShell title={id} crumbs={[{ to: '/historico', label: 'Histórico' }]}>
+        <LoadingBlock height={360} />
+      </PageShell>
+    );
+  if (reading.isError) return (
+      <PageShell title={id} crumbs={[{ to: '/historico', label: 'Histórico' }]}>
+        <ErrorState error={reading.error} onRetry={() => void reading.refetch()} />
+      </PageShell>
+    );
   const r = reading.data;
 
   return (
     <div className="page">
       <PageHeader
         crumbs={[{ to: '/historico', label: 'Histórico' }]}
-        title={`${VARIETY_BY_ID[r.varietyId]?.name ?? r.varietyId} · ${r.id}`}
+        eyebrow={`Análise ${r.id} · ${SOURCE_LABEL[r.source]}`}
+        title={VARIETY_BY_ID[r.varietyId]?.name ?? r.varietyId}
         description={`${r.sensorId} · ${r.block} · ${r.location} · ${formatDateTime(r.capturedAt)}`}
         actions={
           can('excluirLeituras') && (

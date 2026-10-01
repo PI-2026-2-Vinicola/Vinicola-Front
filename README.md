@@ -60,7 +60,7 @@ src/
 ├── data/                 # tipos do contrato da API, rótulos e catálogo de variedades
 ├── lib/                  # períodos, formatação, cliente de cache
 ├── components/
-│   ├── layout/           # AppShell (menu lateral), PageHeader, Navbar pública, guardas de rota
+│   ├── layout/           # Navbar (menu superior), PageHeader (faixa no estilo da landing), rodapé, guardas de rota
 │   ├── reading/          # imagem real da leitura com as caixas de detecção
 │   ├── analysis/         # detalhe da leitura, envio de imagem, histórico por variedade
 │   ├── sensors/          # formulário de sensor e exibição do token
@@ -77,7 +77,7 @@ Toda consulta tem estado de carregamento, erro (com “Tentar novamente” e men
 ## Identidade visual
 
 - Vinho (`#6d1c3f` / `#86264e`), rosa claro e branco; cores de status (verde, amarelo, vermelho) sempre com ícone e rótulo.
-- Área autenticada com visual sóbrio: superfícies brancas, bordas finas, sem gradientes; página pública com o hero institucional.
+- A área autenticada segue o estilo da página inicial: menu transparente centralizado no topo (ganha fundo ao rolar), faixa vinho com sobretítulo e título em Fraunces, e cartões sobrepostos à faixa. Em telas menores o menu vira o botão ☰.
 - Tipografia Fraunces (títulos da página pública) e Inter (interface).
 - As figuras de cachos da página inicial e da biblioteca são ilustrações vetoriais e estão marcadas como tal; nas leituras, a imagem exibida é a foto real processada pela API.
 

@@ -381,7 +381,8 @@ export default function Admin() {
   const tab = TABS.find((t) => t.id === params.get('aba')) ?? TABS[0];
   return (
     <div className="page">
-      <PageHeader title="Administração" description="Usuários e perfis de acesso, estado do sistema, trilha de auditoria e integração dos dispositivos." />
+      <PageHeader eyebrow="Sistema"
+        title="Administração" description="Usuários e perfis de acesso, estado do sistema, trilha de auditoria e integração dos dispositivos." />
       <div className="tabs" role="tablist">
         {TABS.map((t) => (
           <button key={t.id} role="tab" aria-selected={tab.id === t.id} onClick={() => setParams(t.id === 'usuarios' ? {} : { aba: t.id }, { replace: true })}>

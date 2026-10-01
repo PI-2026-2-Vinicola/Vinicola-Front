@@ -327,7 +327,8 @@ export default function Import() {
 
   return (
     <div className="page">
-      <PageHeader title="Importação de dados" description="Traga dados reais de planilhas e outros sistemas. Cada linha é validada; duplicados e erros são identificados antes de gravar." />
+      <PageHeader eyebrow="Dados de campo"
+        title="Importação de dados" description="Traga dados reais de planilhas e outros sistemas. Cada linha é validada; duplicados e erros são identificados antes de gravar." />
 
       <div className="kind-grid" role="radiogroup" aria-label="Tipo de dado">
         {KINDS.map((k) => (

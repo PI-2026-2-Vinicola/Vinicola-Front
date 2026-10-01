@@ -89,6 +89,7 @@ export default function Sensors() {
   return (
     <div className="page">
       <PageHeader
+        eyebrow="Rede de dispositivos"
         title="Sensores"
         description="Dispositivos de captura instalados nos talhões. O status é calculado pela última comunicação, bateria e sinal informados pelo próprio dispositivo."
         actions={

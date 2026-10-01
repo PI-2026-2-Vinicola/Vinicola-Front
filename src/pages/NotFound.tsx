@@ -1,10 +1,12 @@
 import { ArrowLeft, SearchX } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PageHeader } from '../components/layout/PageHeader';
 
 export default function NotFound({ inline = false, title = 'Página não encontrada', back = '/historico' }: { inline?: boolean; title?: string; back?: string }) {
   if (inline)
     return (
       <div className="page">
+        <PageHeader eyebrow="Erro 404" title={title} />
         <div className="card restricted">
           <div className="kpi-icon">
             <SearchX />

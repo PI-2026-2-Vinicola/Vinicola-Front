@@ -104,6 +104,7 @@ export default function History() {
   return (
     <div className="page">
       <PageHeader
+        eyebrow="Registro completo"
         title="Histórico de análises"
         description="Todas as leituras registradas — de sensores, envios manuais e importações — com filtros combináveis."
         actions={

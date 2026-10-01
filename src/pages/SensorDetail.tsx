@@ -6,7 +6,7 @@ import { ReadingListItem } from '../components/analysis/ReadingListItem';
 import { ReadingModal } from '../components/analysis/ReadingModal';
 import { ChartCard } from '../components/charts/ChartCard';
 import { AnalysesByDayChart, EnvironmentChart, QualityLegend, TelemetryChart } from '../components/charts/Charts';
-import { PageHeader } from '../components/layout/PageHeader';
+import { PageHeader, PageShell } from '../components/layout/PageHeader';
 import { SensorForm, type SensorFormValues } from '../components/sensors/SensorForm';
 import { TokenReveal } from '../components/sensors/TokenReveal';
 import { SensorStatusBadge, VarietyTag } from '../components/ui/Badges';
@@ -133,8 +133,16 @@ export default function SensorDetail() {
   });
 
   if (sensor.isError && sensor.error instanceof ApiError && sensor.error.status === 404) return <NotFound inline title="Sensor não encontrado" back="/sensores" />;
-  if (sensor.isPending) return <div className="page"><LoadingBlock height={480} /></div>;
-  if (sensor.isError) return <div className="page"><ErrorState error={sensor.error} onRetry={() => void sensor.refetch()} /></div>;
+  if (sensor.isPending) return (
+      <PageShell title={id} crumbs={[{ to: '/sensores', label: 'Sensores' }]}>
+        <LoadingBlock height={360} />
+      </PageShell>
+    );
+  if (sensor.isError) return (
+      <PageShell title={id} crumbs={[{ to: '/sensores', label: 'Sensores' }]}>
+        <ErrorState error={sensor.error} onRetry={() => void sensor.refetch()} />
+      </PageShell>
+    );
   const s = sensor.data;
   const sum = summary.data;
   const envPoints = env.data ?? [];
@@ -144,12 +152,13 @@ export default function SensorDetail() {
     <div className="page">
       <PageHeader
         crumbs={[{ to: '/sensores', label: 'Sensores' }]}
+        eyebrow={s.device ? `Sensor ${s.id} · ${s.device}` : `Sensor ${s.id}`}
         title={
           <span className="row" style={{ gap: 12, flexWrap: 'wrap' }}>
             {s.name} <SensorStatusBadge status={s.status} />
           </span>
         }
-        description={`${s.id} · ${s.block} · ${s.location}`}
+        description={`${s.block} · ${s.location}`}
         actions={
           <>
             <PeriodPicker value={period} from={from} to={to} onChange={setPeriod} />

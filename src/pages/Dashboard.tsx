@@ -91,6 +91,7 @@ export default function Dashboard() {
   return (
     <div className="page">
       <PageHeader
+        eyebrow="Visão geral"
         title={`Olá, ${user?.name.split(' ')[0]}`}
         description={`Painel de ${formatLongDate(new Date())}${s?.lastReadingAt ? ` · última leitura ${formatRelative(s.lastReadingAt)}` : ''}`}
         actions={<PeriodPicker value={period} from={from} to={to} onChange={setPeriod} />}
