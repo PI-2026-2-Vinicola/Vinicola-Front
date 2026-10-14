@@ -15,6 +15,7 @@ import './styles/layout.css';
 import './styles/map.css';
 import './styles/analysis.css';
 import './styles/landing.css';
+import './styles/content.css';
 import './styles/pages.css';
 import './styles/app.css';
 import './styles/integrations.css';

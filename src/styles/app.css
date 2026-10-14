@@ -1376,16 +1376,6 @@ pre.code {
   text-transform: uppercase;
 }
 
-.yolo-input,
-.showcase-frame {
-  position: relative;
-}
-
-.hero-stats-note {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-}
-
 .muted.small,
 p.small {
   font-size: 13px;

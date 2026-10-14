@@ -1,21 +1,15 @@
-import { Hero } from '../components/landing/Hero';
-import { Architecture, Cycle, FinalCta, FullFlow, GrapesPreview, Meaning, PlatformPreview, Sustainability, TechStack, ValeSection, YoloShowcase } from '../components/landing/Sections';
+import { Benefits, HomeHero, HowToUse, LearnGrapes, ProjectIntro, Shortcuts } from '../components/home/HomeSections';
 
+/** Página inicial institucional e educativa (a documentação técnica fica em /sobre). */
 export default function Home() {
   return (
     <>
-      <Hero />
-      <Meaning />
-      <Cycle />
-      <Architecture />
-      <YoloShowcase />
-      <PlatformPreview />
-      <GrapesPreview />
-      <ValeSection />
-      <Sustainability />
-      <TechStack />
-      <FullFlow />
-      <FinalCta />
+      <HomeHero />
+      <ProjectIntro />
+      <LearnGrapes />
+      <HowToUse />
+      <Benefits />
+      <Shortcuts />
     </>
   );
 }
