@@ -1,142 +1,45 @@
-import { ArrowRight, CircleCheck, Info, OctagonAlert, TriangleAlert } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { DISCLAIMER } from '../components/analysis/ReadingDetail';
-import { GrapeScene } from '../components/grape/GrapeScene';
+import { CalendarRange, Grape, MessagesSquare } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { QuestionSearch } from '../components/embrapa/QuestionSearch';
+import { ZarcPanel } from '../components/embrapa/ZarcPanel';
+import { VarietyLibrary } from '../components/grape/VarietyLibrary';
 import { PageHero } from '../components/layout/PageHero';
-import { QualityBadge } from '../components/ui/Badges';
-import { Reveal } from '../components/ui/Reveal';
-import { QUALITY_ORDER } from '../data/labels';
-import type { Variety } from '../data/types';
-import { VARIETIES } from '../data/varieties';
 
-export const CRITERIA_INFO = [
-  { q: 'boa' as const, icon: CircleCheck, text: 'Características visuais dentro dos parâmetros esperados para a variedade.' },
-  { q: 'atencao' as const, icon: TriangleAlert, text: 'Características que precisam ser acompanhadas nas próximas leituras.' },
-  { q: 'critica' as const, icon: OctagonAlert, text: 'Características visuais fora do padrão esperado — recomenda-se inspeção em campo.' },
-];
+const TABS = [
+  { id: 'perguntas', label: 'Perguntas e respostas', icon: MessagesSquare, hint: 'Conteúdo técnico da Embrapa sobre o cultivo da uva.' },
+  { id: 'plantio', label: 'Época de plantio (Zarc)', icon: CalendarRange, hint: 'Janelas de plantio de menor risco climático por município.' },
+  { id: 'variedades', label: 'Variedades monitoradas', icon: Grape, hint: 'As uvas do catálogo usado nas análises da OASIS.' },
+] as const;
 
-export function CriteriaList({ variety }: { variety: Variety }) {
-  return (
-    <div className="criteria">
-      {QUALITY_ORDER.map((q) => (
-        <div key={q} className={`criteria-row ${q}`}>
-          <QualityBadge quality={q} />
-          <span>{variety.criteria[q]}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function GrapeImage({ variety, seed = 11 }: { variety: Variety; seed?: number }) {
-  return <GrapeScene className="scene" seed={seed} varietyId={variety.id} detections={[{ kind: 'cacho', label: '', confidence: 1, box: [0.3, 0.12, 0.4, 0.74] }]} showBoxes={false} title={`Ilustração de um cacho de ${variety.name}`} />;
-}
+type TabId = (typeof TABS)[number]['id'];
 
 export default function Grapes() {
-  const [type, setType] = useState<'todas' | 'Tinta' | 'Branca'>('todas');
-  const list = VARIETIES.filter((v) => type === 'todas' || v.type === type);
+  const [params, setParams] = useSearchParams();
+  const tab: TabId = TABS.find((t) => t.id === params.get('aba'))?.id ?? 'perguntas';
+  const setTab = (id: TabId) => setParams(id === 'perguntas' ? {} : { aba: id }, { replace: true });
+
   return (
     <>
-      <PageHero eyebrow="Biblioteca educacional" title="Conheça nossas uvas" description="As variedades do catálogo da OASIS, suas características e os critérios visuais usados para classificar cada leitura. As imagens são ilustrações." />
+      <PageHero
+        eyebrow="Viticultura"
+        title="Uvas"
+        description="Perguntas e respostas da Embrapa sobre o cultivo da uva, épocas de plantio indicadas pelo Zoneamento Agrícola de Risco Climático e as variedades acompanhadas pelo projeto."
+      />
       <div className="container page-body">
-        <div className="card toolbar" style={{ marginBottom: 20 }}>
-          <div className="segmented" role="group" aria-label="Tipo de uva">
-            {(['todas', 'Tinta', 'Branca'] as const).map((t) => (
-              <button key={t} aria-pressed={type === t} onClick={() => setType(t)}>
-                {t === 'todas' ? 'Todas' : t === 'Tinta' ? 'Tintas' : 'Brancas'}
+        <div className="card grape-tabs">
+          <div className="tabs" role="tablist" aria-label="Seções da página Uvas">
+            {TABS.map((t) => (
+              <button key={t.id} role="tab" id={`tab-${t.id}`} aria-selected={tab === t.id} aria-controls={`painel-${t.id}`} onClick={() => setTab(t.id)}>
+                <t.icon aria-hidden="true" /> {t.label}
               </button>
             ))}
           </div>
-          <span className="muted" style={{ fontSize: 13.5 }}>
-            {list.length} variedades
-          </span>
+          <p className="grape-tabs-hint">{TABS.find((t) => t.id === tab)!.hint}</p>
         </div>
-
-        <div className="grape-cards">
-          {list.map((v, i) => (
-            <Reveal key={v.id} delay={(i % 3) * 80}>
-              <article className="card card-hover grape-card" style={{ height: '100%' }}>
-                <div className="grape-card-media">
-                  <GrapeImage variety={v} seed={31 + i * 7} />
-                  <div className="grape-card-tags">
-                    <span className="badge">Uva {v.type.toLowerCase()}</span>
-                  </div>
-                </div>
-                <div className="grape-card-body">
-                  <div>
-                    <h3>{v.name}</h3>
-                    <span className="muted" style={{ fontSize: 13 }}>
-                      {v.origin}
-                    </span>
-                  </div>
-                  <p>{v.description}</p>
-                  <div className="spec-grid">
-                    <div>
-                      <span>Tipo</span>
-                      <strong>{v.type}</strong>
-                    </div>
-                    <div>
-                      <span>Cor</span>
-                      <strong>{v.color}</strong>
-                    </div>
-                    <div>
-                      <span>Maturação</span>
-                      <strong>{v.maturationCycle}</strong>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="field-label" style={{ marginBottom: 8 }}>
-                      Características
-                    </div>
-                    <ul className="bullets">
-                      {v.characteristics.map((c) => (
-                        <li key={c}>{c}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <div className="field-label" style={{ marginBottom: 8 }}>
-                      Características visuais
-                    </div>
-                    <ul className="bullets">
-                      {v.visualTraits.map((c) => (
-                        <li key={c}>{c}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <details className="criteria-details">
-                    <summary>Critérios de classificação</summary>
-                    <CriteriaList variety={v} />
-                  </details>
-                  <Link to={`/uvas/${v.id}`} className="link" style={{ marginTop: 'auto' }}>
-                    Ver variedade e histórico <ArrowRight />
-                  </Link>
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-
-        <div className="section-title">
-          <div>
-            <h2>Como as uvas são classificadas</h2>
-            <p>Cada leitura recebe uma das três classificações a partir da análise da imagem pelo modelo.</p>
-          </div>
-        </div>
-        <div className="grid-3">
-          {CRITERIA_INFO.map((c, i) => (
-            <Reveal key={c.q} delay={i * 80}>
-              <div className="card card-pad" style={{ height: '100%' }}>
-                <QualityBadge quality={c.q} />
-                <p style={{ marginTop: 12, color: 'var(--ink-600)' }}>{c.text}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-        <div className="notice" style={{ marginTop: 20 }}>
-          <Info />
-          <span>{DISCLAIMER}</span>
+        <div role="tabpanel" id={`painel-${tab}`} aria-labelledby={`tab-${tab}`} className="grape-panel">
+          {tab === 'perguntas' && <QuestionSearch onShowVarieties={() => setTab('variedades')} />}
+          {tab === 'plantio' && <ZarcPanel />}
+          {tab === 'variedades' && <VarietyLibrary />}
         </div>
       </div>
     </>

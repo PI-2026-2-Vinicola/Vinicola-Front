@@ -1,15 +1,15 @@
-import { ArrowRight, Info, LogIn } from 'lucide-react';
+import { ArrowRight, Info, LogIn, Search } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { DISCLAIMER } from '../components/analysis/ReadingDetail';
 import { VarietyHistory } from '../components/analysis/VarietyHistory';
+import { CriteriaList, embrapaSearchLink, GrapeImage } from '../components/grape/VarietyLibrary';
 import { PeriodPicker } from '../components/ui/Filters';
 import { Reveal } from '../components/ui/Reveal';
 import { useAuth } from '../context/AuthContext';
 import type { VarietyId } from '../data/types';
 import { VARIETIES, VARIETY_BY_ID } from '../data/varieties';
 import { periodQuery, type Period } from '../lib/period';
-import { CriteriaList, GrapeImage } from './Grapes';
 import NotFound from './NotFound';
 
 export default function GrapeDetail() {
@@ -34,6 +34,9 @@ export default function GrapeDetail() {
             </span>
             <h1 className="display">{variety.name}</h1>
             <p>{variety.description}</p>
+            <Link to={embrapaSearchLink(variety.name)} className="btn btn-glass btn-sm" style={{ marginTop: 20 }}>
+              <Search /> Buscar “{variety.name}” nas perguntas da Embrapa
+            </Link>
           </div>
           <div className="grape-hero-media" style={{ animation: 'fadeUp .8s .1s var(--ease) both' }}>
             <GrapeImage variety={variety} seed={77 + index} />
