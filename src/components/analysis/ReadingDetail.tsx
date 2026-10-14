@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ANOMALY_LABEL, MATURATION_LABEL, MATURATION_ORDER, SEVERE_ANOMALIES } from '../../data/labels';
 import type { Reading } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
+import { analysisKind } from '../../lib/analysis';
 import { formatDate, formatTime } from '../../lib/format';
 import { ReadingImage } from '../reading/ReadingImage';
 import { ClassificationBadge, QualityBadge, SourceBadge } from '../ui/Badges';
@@ -13,15 +14,18 @@ import { YoloResult } from './YoloResult';
 
 export const DISCLAIMER = 'Esta classificação é baseada na análise computacional da imagem e não substitui a avaliação agronômica profissional.';
 
-export function ReadingDetail({ reading, onNavigate }: { reading: Reading; onNavigate?: () => void }) {
+/** `infoOnly`: só os dados da leitura (quando a imagem já é exibida ao lado, como no resultado do envio). */
+export function ReadingDetail({ reading, onNavigate, infoOnly = false }: { reading: Reading; onNavigate?: () => void; infoOnly?: boolean }) {
   const [boxes, setBoxes] = useState(true);
   const { can } = useAuth();
   const variety = VARIETY_BY_ID[reading.varietyId];
   const matIndex = MATURATION_ORDER.indexOf(reading.maturation);
   const hasImage = !!reading.imageUrl;
+  const kind = analysisKind(reading.modelVersion);
 
   return (
-    <div className="reading-detail">
+    <div className={`reading-detail ${infoOnly ? 'reading-detail--info' : ''}`}>
+      {!infoOnly && (
       <div className="reading-media">
         <div className="reading-image">
           <ReadingImage reading={reading} showBoxes={boxes} />
@@ -53,6 +57,7 @@ export function ReadingDetail({ reading, onNavigate }: { reading: Reading; onNav
           )}
         </div>
       </div>
+      )}
 
       <div className="reading-info">
         <div>
@@ -70,8 +75,13 @@ export function ReadingDetail({ reading, onNavigate }: { reading: Reading; onNav
         </div>
 
         <div className="info-block">
-          <div className="field-label">Confiança da detecção</div>
+          <div className="field-label">{kind === 'color' ? 'Índice da análise de cor' : 'Confiança da detecção'}</div>
           <ConfidenceBar value={reading.confidence} large />
+          {kind === 'color' && (
+            <p className="field-hint">
+              Calculado pela proporção de pixels com cor de baga na região do cacho; não é a probabilidade de um modelo treinado. A variedade é a cadastrada no talhão do sensor.
+            </p>
+          )}
         </div>
 
         <div className="info-grid">
