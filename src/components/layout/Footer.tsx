@@ -17,17 +17,17 @@ export function Footer() {
             <h4>Plataforma</h4>
             <ul>
               <li><Link to="/dashboard">Dashboard</Link></li>
-              <li><Link to="/sensores">Sensores IoT</Link></li>
-              <li><Link to="/analises">Análises</Link></li>
+              <li><Link to="/monitoramento">Monitoramento</Link></li>
+              <li><Link to="/analises">Análise de imagem</Link></li>
               <li><Link to="/historico">Histórico</Link></li>
             </ul>
           </div>
           <div>
             <h4>Conhecimento</h4>
             <ul>
-              <li><Link to="/uvas">Conheça nossas uvas</Link></li>
-              <li><Link to="/sobre">Como a OASIS funciona</Link></li>
-              <li><Link to="/sobre#vale">Vale do São Francisco</Link></li>
+              <li><Link to="/uvas">Uvas e viticultura</Link></li>
+              <li><Link to="/#vale">Vale do São Francisco</Link></li>
+              <li><Link to="/sobre">Documentação técnica</Link></li>
               <li><Link to="/sobre#tecnologias">Tecnologias</Link></li>
             </ul>
           </div>

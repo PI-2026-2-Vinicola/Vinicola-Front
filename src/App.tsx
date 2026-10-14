@@ -11,6 +11,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Sensors = lazy(() => import('./pages/Sensors'));
 const SensorDetail = lazy(() => import('./pages/SensorDetail'));
+const Monitoring = lazy(() => import('./pages/Monitoring'));
 const Analyses = lazy(() => import('./pages/Analyses'));
 const Classification = lazy(() => import('./pages/Classification'));
 const History = lazy(() => import('./pages/History'));
@@ -94,6 +95,7 @@ export default function App() {
           <Route path="/dashboard" element={<RequireAccess area="dashboard"><Dashboard /></RequireAccess>} />
           <Route path="/sensores" element={<RequireAccess area="sensores"><Sensors /></RequireAccess>} />
           <Route path="/sensores/:id" element={<RequireAccess area="sensores"><SensorDetail /></RequireAccess>} />
+          <Route path="/monitoramento" element={<RequireAccess area="monitoramento"><Monitoring /></RequireAccess>} />
           <Route path="/analises" element={<RequireAccess area="analises"><Analyses /></RequireAccess>} />
           <Route path="/classificacao" element={<RequireAccess area="classificacao"><Classification /></RequireAccess>} />
           <Route path="/historico" element={<RequireAccess area="historico"><History /></RequireAccess>} />

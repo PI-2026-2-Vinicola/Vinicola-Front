@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, Cpu, FileUp, Grape, History, House, Info, LayoutDashboard, Lock, LogIn, LogOut, Menu, Settings, UserRound, X } from 'lucide-react';
+import { Activity, BarChart3, BookOpen, Cpu, FileUp, Grape, History, House, Info, LayoutDashboard, Lock, LogIn, LogOut, Menu, Settings, UserRound, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -15,14 +15,13 @@ interface NavItem {
   area?: Area;
 }
 
-/** Menu do visitante: áreas da plataforma aparecem com cadeado. */
+/** Menu do visitante: conteúdo público e, com cadeado, as principais áreas da plataforma. */
 const PUBLIC_ITEMS: NavItem[] = [
   { to: '/', label: 'Início', icon: House },
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, area: 'dashboard' },
-  { to: '/sensores', label: 'Sensores', icon: Cpu, area: 'sensores' },
-  { to: '/analises', label: 'Análises', icon: BarChart3, area: 'analises' },
-  { to: '/historico', label: 'Histórico', icon: History, area: 'historico' },
   { to: '/uvas', label: 'Uvas', icon: Grape },
+  { to: '/monitoramento', label: 'Monitoramento', icon: Activity, area: 'monitoramento' },
+  { to: '/analises', label: 'Análises', icon: BarChart3, area: 'analises' },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, area: 'dashboard' },
   { to: '/sobre', label: 'Sobre', icon: Info },
 ];
 
@@ -31,6 +30,7 @@ const APP_ITEMS: NavItem[] = [
   { to: '/', label: 'Início', icon: House },
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, area: 'dashboard' },
   { to: '/sensores', label: 'Sensores', icon: Cpu, area: 'sensores' },
+  { to: '/monitoramento', label: 'Monitoramento', icon: Activity, area: 'monitoramento' },
   { to: '/analises', label: 'Análises', icon: BarChart3, area: 'analises' },
   { to: '/classificacao', label: 'Classificação', icon: Grape, area: 'classificacao' },
   { to: '/historico', label: 'Histórico', icon: History, area: 'historico' },
@@ -113,10 +113,10 @@ export function Navbar() {
                     </Link>
                   )}
                   <Link to="/uvas" role="menuitem">
-                    <BookOpen /> Biblioteca de uvas
+                    <BookOpen /> Uvas e viticultura
                   </Link>
                   <Link to="/sobre" role="menuitem">
-                    <Info /> Sobre a OASIS
+                    <Info /> Documentação técnica
                   </Link>
                   <button onClick={doLogout} role="menuitem">
                     <LogOut /> Sair
@@ -156,7 +156,7 @@ export function Navbar() {
                 <>
                   <span className="drawer-sep" />
                   <NavLink to="/uvas">
-                    <BookOpen /> Biblioteca de uvas
+                    <BookOpen /> Uvas e viticultura
                   </NavLink>
                   <NavLink to="/sobre">
                     <Info /> Sobre

@@ -256,3 +256,164 @@ export interface SystemStatus {
   storageMb: number;
   counts: Record<string, number>;
 }
+
+/* ------------------------------------------------------------------ análise de imagem: modelo em uso */
+export interface ModelClass {
+  /** Rótulo do modelo (ex.: syrah, podridao). */
+  name: string;
+  label: string;
+  kind: 'variedade' | 'anomalia_leve' | 'anomalia_grave';
+}
+
+export interface AnalysisModel {
+  detector: string;
+  version: string;
+  description: string;
+  yoloLoaded: boolean;
+  yoloWeightsFile: string;
+  yoloWeightsFound: boolean;
+  classes: ModelClass[];
+  confidenceThreshold: number | null;
+  anomalyMinConfidence: number;
+  maxUploadMb: number;
+  acceptedFormats: string[];
+  timeoutSeconds: number;
+  limitations: string[];
+}
+
+/* ------------------------------------------------------------------ integrações externas */
+export interface IntegrationState {
+  configured: boolean;
+  detail: string;
+}
+
+export interface IntegrationsStatus {
+  thingspeak: IntegrationState;
+  embrapa: IntegrationState;
+  detector: IntegrationState;
+  yoloLoaded: boolean;
+}
+
+export type ThingSpeakPeriod = 'recent' | '24h' | '7d' | '30d';
+
+export interface ThingSpeakChannel {
+  id: number;
+  name: string | null;
+  description: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  lastEntryId: number | null;
+}
+
+/** Campo do canal (field1…field8): o nome vem do próprio canal; a unidade, só se configurada no servidor. */
+export interface ThingSpeakField {
+  key: string;
+  name: string;
+  unit: string | null;
+  numeric: boolean;
+  latest: number | null;
+  latestText: string | null;
+  latestAt: string | null;
+  count: number;
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+}
+
+export interface ThingSpeakEntry {
+  createdAt: string;
+  entryId: number | null;
+  values: Record<string, number | null>;
+}
+
+export interface ThingSpeakFeed {
+  configured: boolean;
+  channelId: string | null;
+  period: ThingSpeakPeriod;
+  aggregation: string | null;
+  channel: ThingSpeakChannel | null;
+  fields: ThingSpeakField[];
+  entries: ThingSpeakEntry[];
+  lastEntryAt: string | null;
+  fetchedAt: string | null;
+  refreshSeconds: number;
+  /** A API devolveu a última resposta válida porque o ThingSpeak falhou. */
+  stale: boolean;
+  warning: string | null;
+}
+
+/** Par pergunta-resposta da Coleção 500 Perguntas 500 Respostas (HTML já sanitizado pela API). */
+export interface EmbrapaQuestion {
+  id: string;
+  number: number | null;
+  question: string;
+  questionHtml: string;
+  answerHtml: string;
+  answerExcerpt: string;
+  snippetHtml: string;
+  chapter: string | null;
+  book: string | null;
+  bookId: string | null;
+  year: number | null;
+  pdfUrl: string | null;
+  epubUrl: string | null;
+}
+
+export type EmbrapaScope = 'grape' | 'all';
+
+export interface EmbrapaSearch {
+  query: string;
+  scope: EmbrapaScope;
+  bookId: string | null;
+  total: number;
+  totalIsExact: boolean;
+  page: number;
+  pageSize: number;
+  items: EmbrapaQuestion[];
+  fetchedAt: string;
+  source: string;
+}
+
+export interface AgritecCulture {
+  id: number;
+  name: string;
+  fullName: string | null;
+  harvest: string | null;
+  cultivation: string | null;
+  climate: string | null;
+  hasZoning: boolean;
+}
+
+/** Janela de plantio do Zarc (dia/mês de início e fim) para um ciclo, solo e risco. */
+export interface AgritecWindow {
+  cycle: string | null;
+  soil: string | null;
+  startDay: number;
+  startMonth: number;
+  endDay: number;
+  endMonth: number;
+  risk: number | null;
+  harvestStart: number | null;
+  harvestEnd: number | null;
+  ordinance: string | null;
+}
+
+export interface AgritecZarc {
+  culture: AgritecCulture;
+  municipality: string;
+  ibgeCode: number;
+  uf: string | null;
+  windows: AgritecWindow[];
+  soils: Record<string, string>;
+  info: Record<string, string | null>;
+  fetchedAt: string;
+  source: string;
+}
+
+export interface Municipality {
+  ibgeCode: number;
+  name: string;
+  uf: string;
+}

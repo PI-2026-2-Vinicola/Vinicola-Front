@@ -2,6 +2,7 @@ import { CircleCheck, OctagonAlert, TriangleAlert } from 'lucide-react';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { QUALITY_COLOR, QUALITY_LABEL, QUALITY_ORDER } from '../../data/labels';
 import type { Bucket, Quality, QualityCount } from '../../data/types';
+import { formatFieldValue } from '../../lib/thingspeak';
 import { barValueLabels, crosshair, INK } from './setup';
 import './setup';
 
@@ -255,6 +256,41 @@ export function EnvironmentChart({ labels, temperature, humidity }: { labels: st
           y: { position: 'left', grid: { color: INK.grid }, border: { display: false }, ticks: { color: INK.muted, callback: (v) => `${v}°` } },
           y1: { position: 'right', min: 0, max: 100, grid: { display: false }, border: { display: false }, ticks: { color: INK.muted, callback: (v) => `${v}%` } },
         },
+      }}
+    />
+  );
+}
+
+/** Série temporal de um campo do ThingSpeak: lacunas mantidas e eixo y ajustado aos valores (sem forçar zero). */
+export function TimeSeriesChart({ labels, data, label, color, unit }: { labels: string[]; data: (number | null)[]; label: string; color: string; unit?: string | null }) {
+  return (
+    <Line
+      data={{
+        labels,
+        datasets: [
+          {
+            label,
+            data,
+            borderColor: color,
+            backgroundColor: color,
+            borderWidth: 2,
+            tension: 0.25,
+            pointRadius: labels.length > 60 ? 0 : 2.5,
+            pointHoverRadius: 5,
+            pointHoverBorderWidth: 2,
+            pointHoverBorderColor: INK.surface,
+            spanGaps: false,
+          },
+        ],
+      }}
+      plugins={[crosshair]}
+      options={{
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: { ...baseScales.x, ticks: { ...baseScales.x.ticks, maxTicksLimit: 7 } },
+          y: { grid: { color: INK.grid }, border: { display: false }, ticks: { color: INK.muted, padding: 8 } },
+        },
+        plugins: { tooltip: { callbacks: { label: (item) => ` ${formatFieldValue(item.raw as number | null, unit)}` } } },
       }}
     />
   );

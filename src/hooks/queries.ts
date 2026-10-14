@@ -1,6 +1,9 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import type { EmbrapaScope, ThingSpeakPeriod } from '../data/types';
 import * as api from '../services/api';
 import type { BreakdownBy, ReadingQuery, ReadingSort } from '../services/api';
+import * as embrapa from '../services/embrapa';
+import { getThingSpeakFeed } from '../services/thingspeak';
 
 /** Chaves de cache — invalidar `['readings']` ou `['stats']` atualiza todas as telas dependentes. */
 export const keys = {
@@ -48,3 +51,46 @@ export const useSystemStatus = () => useQuery({ queryKey: ['system-status'], que
 
 export const useAudit = (page: number, action?: string) =>
   useQuery({ queryKey: ['audit', page, action], queryFn: () => api.getAudit(page, action), placeholderData: keepPreviousData });
+
+export const useAnalysisModel = () => useQuery({ queryKey: ['analysis-model'], queryFn: api.getAnalysisModel, staleTime: 5 * 60_000 });
+
+/* ------------------------------------------------------------------ integrações externas */
+// Falhas de serviços externos já passaram pelo servidor: uma nova tentativa basta (e poupa a cota das APIs).
+const externalRetry = { retry: 1 } as const;
+
+export const useIntegrations = () => useQuery({ queryKey: ['integrations'], queryFn: api.getIntegrations, staleTime: 5 * 60_000, ...externalRetry });
+
+/** Canal do ThingSpeak; atualiza sozinho no intervalo sugerido pela API enquanto a aba está visível. */
+export const useThingSpeak = (period: ThingSpeakPeriod, results = 100) =>
+  useQuery({
+    queryKey: ['thingspeak', period, results],
+    queryFn: () => getThingSpeakFeed(period, results),
+    placeholderData: keepPreviousData,
+    refetchInterval: (query) => (query.state.data?.configured ? query.state.data.refreshSeconds * 1000 : false),
+    refetchIntervalInBackground: false,
+    staleTime: 15_000,
+    ...externalRetry,
+  });
+
+export const useEmbrapaSearch = (q: string, page: number, scope: EmbrapaScope, enabled: boolean) =>
+  useQuery({
+    queryKey: ['embrapa', 'search', q.trim().toLowerCase(), page, scope],
+    queryFn: () => embrapa.searchQuestions(q.trim(), page, scope),
+    enabled: enabled && q.trim().length >= 2,
+    placeholderData: keepPreviousData,
+    staleTime: 10 * 60_000,
+    ...externalRetry,
+  });
+
+export const useZarcCultures = (enabled: boolean) => useQuery({ queryKey: ['embrapa', 'zarc-cultures'], queryFn: embrapa.getZarcCultures, enabled, staleTime: 60 * 60_000, ...externalRetry });
+
+export const useZarc = (cultureId: number | null, ibge: number | null) =>
+  useQuery({
+    queryKey: ['embrapa', 'zarc', cultureId, ibge],
+    queryFn: () => embrapa.getZarc(cultureId!, ibge!),
+    enabled: cultureId !== null && ibge !== null,
+    staleTime: 60 * 60_000,
+    ...externalRetry,
+  });
+
+export const useMunicipalities = () => useQuery({ queryKey: ['embrapa', 'municipalities'], queryFn: embrapa.getMunicipalities, staleTime: Infinity, ...externalRetry });

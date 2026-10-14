@@ -1,4 +1,5 @@
 import type {
+  AnalysisModel,
   AuditEntry,
   Bucket,
   EnvironmentDay,
@@ -7,6 +8,7 @@ import type {
   ImportJob,
   ImportKind,
   ImportPreview,
+  IntegrationsStatus,
   Page,
   PublicOverview,
   Quality,
@@ -90,6 +92,12 @@ export function uploadImage(sensorId: string, file: File, capturedAt?: string): 
   return http<Reading>('/ingest', { method: 'POST', body: form });
 }
 
+/** Detector efetivamente em uso na API (análise de cor ou YOLO), suas classes e limites de envio. */
+export const getAnalysisModel = () => http<AnalysisModel>('/analysis/model');
+
+/** Situação das integrações externas (sem identificadores nem credenciais). */
+export const getIntegrations = () => http<IntegrationsStatus>('/public/integrations', { anonymous: true });
+
 /* ------------------------------------------------------------------ indicadores */
 export const getSummary = (f: ReadingQuery) => http<Summary>('/stats/summary', { query: query(f) });
 export const getByDay = (f: ReadingQuery) => http<Bucket[]>('/stats/by-day', { query: query(f) });
@@ -121,6 +129,7 @@ export const getAudit = (page = 1, action?: string) => http<Page<AuditEntry>>('/
 export const ACCESS = {
   dashboard: ['admin', 'gestor'],
   sensores: ['admin', 'gestor'],
+  monitoramento: ['admin', 'gestor', 'operador'],
   analises: ['admin', 'gestor', 'operador'],
   classificacao: ['admin', 'gestor', 'operador'],
   historico: ['admin', 'gestor', 'operador'],

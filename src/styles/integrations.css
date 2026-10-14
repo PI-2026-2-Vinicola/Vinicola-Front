@@ -1,0 +1,743 @@
+/* Integrações externas (ThingSpeak, Embrapa) e fluxo de análise de imagem. Usa os tokens de tokens.css. */
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+.rot-180 {
+  transform: rotate(180deg);
+}
+
+/* ------------------------------------------------------------------ integração pendente e fonte dos dados */
+.integration-pending {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 28px;
+}
+
+.integration-pending .kpi-icon {
+  flex: none;
+  margin: 0;
+}
+
+.integration-pending h3 {
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.integration-pending-body {
+  display: grid;
+  gap: 8px;
+  max-width: 780px;
+  margin-top: 8px;
+  color: var(--ink-600);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.integration-pending-body a {
+  color: var(--wine-600);
+  font-weight: 600;
+}
+
+.integration-pending-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.source-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-500);
+}
+
+.source-note svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+}
+
+@media (max-width: 560px) {
+  .integration-pending {
+    flex-direction: column;
+    padding: 22px;
+  }
+}
+
+/* ------------------------------------------------------------------ monitoramento (ThingSpeak) */
+.monitor-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  padding: 18px 22px;
+}
+
+.monitor-channel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.monitor-channel .kpi-icon {
+  flex: none;
+  margin: 0;
+}
+
+.monitor-channel h2 {
+  font-size: 19px;
+  font-weight: 650;
+}
+
+.monitor-channel p {
+  margin-top: 2px;
+  font-size: 13.5px;
+}
+
+.monitor-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+
+.monitor-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.monitor-refresh svg {
+  width: 14px;
+  height: 14px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.field-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 18px 16px;
+}
+
+.field-card::before {
+  content: '';
+  width: 32px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--series, var(--wine-500));
+}
+
+.field-card header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.field-card-key {
+  font-size: 11.5px;
+  color: var(--ink-400);
+}
+
+.field-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink-700);
+}
+
+.field-card-value {
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--ink-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.field-card-value.is-text {
+  font-size: 17px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.field-card dl {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.field-card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.field-card dt {
+  color: var(--ink-500);
+}
+
+.field-card dd {
+  margin: 0;
+  font-weight: 550;
+  text-align: right;
+  color: var(--ink-700);
+}
+
+.channel-info {
+  display: grid;
+  gap: 14px;
+}
+
+.channel-info > p {
+  font-size: 14.5px;
+  color: var(--ink-600);
+}
+
+.channel-info .kv {
+  max-width: 560px;
+}
+
+@media (max-width: 640px) {
+  .monitor-controls {
+    width: 100%;
+  }
+  .monitor-controls .segmented {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    border-radius: 16px;
+  }
+  .monitor-controls .segmented button {
+    border-radius: 12px;
+  }
+}
+
+/* ------------------------------------------------------------------ Uvas: abas */
+.grape-tabs {
+  padding: 4px 16px 0;
+}
+
+.grape-tabs .tabs {
+  border-bottom: 0;
+}
+
+.grape-tabs-hint {
+  padding: 12px 16px 14px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  color: var(--ink-500);
+}
+
+.grape-panel {
+  margin-top: 20px;
+}
+
+.grape-card-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: auto;
+}
+
+/* ------------------------------------------------------------------ Embrapa: perguntas e respostas */
+.qa-search {
+  display: grid;
+  gap: 14px;
+}
+
+.qa-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.qa-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.qa-results-head {
+  padding: 18px 22px 0;
+  font-size: 14.5px;
+  color: var(--ink-600);
+}
+
+.qa-results-head strong {
+  color: var(--ink-900);
+}
+
+.qa-list {
+  margin: 0;
+  padding: 4px 22px;
+  list-style: none;
+}
+
+.qa-item {
+  display: grid;
+  gap: 8px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.qa-item:last-child {
+  border-bottom: 0;
+}
+
+.qa-chapter {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wine-500);
+}
+
+.qa-item h3 {
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.qa-snippet {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink-600);
+}
+
+.qa-snippet > *,
+.qa-snippet p {
+  display: inline;
+  margin: 0;
+}
+
+.qa-snippet img {
+  display: none;
+}
+
+.qa-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
+.qa-foot .link svg {
+  transition: transform 0.2s var(--ease);
+}
+
+.qa-source {
+  padding: 4px 22px 20px;
+}
+
+.highlight {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: var(--rose-200);
+  color: var(--wine-900);
+}
+
+.qa-answer {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+
+.prose {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-700);
+}
+
+.prose > * + * {
+  margin-top: 10px;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 20px;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.prose table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.prose td,
+.prose th {
+  padding: 6px 10px;
+  border: 1px solid var(--line-strong);
+}
+
+.prose a {
+  color: var(--wine-600);
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .qa-form {
+    grid-template-columns: 1fr;
+  }
+  .qa-list,
+  .qa-results-head,
+  .qa-source {
+    padding-inline: 16px;
+  }
+}
+
+/* ------------------------------------------------------------------ Embrapa: Zarc */
+.zarc-intro {
+  display: grid;
+  gap: 10px;
+}
+
+.zarc-intro p {
+  max-width: 920px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink-600);
+}
+
+.zarc-filters .filter-bar-row {
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.zarc-filters .field {
+  min-width: 220px;
+}
+
+.zarc-table td {
+  vertical-align: middle;
+}
+
+.zarc-months,
+.zarc-months-head {
+  display: grid;
+  grid-template-columns: repeat(12, 14px);
+  gap: 3px;
+}
+
+.zarc-months-head span {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--ink-400);
+}
+
+.zarc-months i {
+  height: 14px;
+  border-radius: 3px;
+  background: var(--offline-bg);
+}
+
+.zarc-months i.on.risk-20 {
+  background: var(--good);
+}
+
+.zarc-months i.on.risk-30 {
+  background: var(--warn);
+}
+
+.zarc-months i.on.risk-40 {
+  background: #e07b39;
+}
+
+.zarc-months i.on.risk-na {
+  background: var(--wine-400);
+}
+
+.zarc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 12.5px;
+  color: var(--ink-500);
+}
+
+.zarc-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zarc-legend i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.zarc-notes {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.zarc-notes summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--wine-700);
+}
+
+.zarc-notes details p,
+.zarc-notes details dl {
+  margin-top: 10px;
+  font-size: 13.5px;
+  color: var(--ink-600);
+}
+
+.zarc-notes details .kv dd {
+  text-align: left;
+  font-weight: 400;
+  color: var(--ink-600);
+}
+
+/* ------------------------------------------------------------------ envio de imagem */
+.upload-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.upload-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--ink-400);
+}
+
+.upload-steps li > span {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-500);
+}
+
+.upload-steps li > span svg {
+  width: 16px;
+  height: 16px;
+}
+
+.upload-steps li.current {
+  border-color: var(--rose-300);
+  background: var(--rose-50);
+  color: var(--wine-700);
+}
+
+.upload-steps li.current > span {
+  border-color: var(--wine-700);
+  background: var(--wine-700);
+  color: #fff;
+}
+
+.upload-steps li.done {
+  color: var(--ink-600);
+}
+
+.upload-steps li.done > span {
+  border-color: transparent;
+  background: var(--good-bg);
+  color: var(--good-ink);
+}
+
+.upload-result {
+  padding: 22px;
+}
+
+.upload-result .upload-done {
+  margin: 0 -22px;
+  padding-inline: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.upload-result-body {
+  display: grid;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.upload-result-body .reading-detail--info {
+  padding: 0;
+}
+
+.reading-detail--info {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.compare-grid figure {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.compare-grid figcaption {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-600);
+}
+
+.detection-foot {
+  padding: 8px 4px 0;
+}
+
+.detection-summary .det-swatch {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: -1px;
+}
+
+.detection-empty strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.form-error-hint {
+  display: block;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+.upload-progress {
+  flex-wrap: wrap;
+}
+
+.upload-progress small {
+  flex-basis: 100%;
+  padding-left: 30px;
+  color: var(--ink-500);
+}
+
+.model-info {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+
+.model-info summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13.5px;
+  color: var(--ink-700);
+}
+
+.model-info summary::-webkit-details-marker {
+  display: none;
+}
+
+.model-info summary > svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--wine-500);
+}
+
+.model-info summary small {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-400);
+}
+
+.model-info-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 14px;
+  font-size: 13.5px;
+  color: var(--ink-600);
+}
+
+.class-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.class-chip {
+  padding: 3px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--white);
+  font-size: 12.5px;
+  color: var(--ink-700);
+}
+
+.class-chip.anomalia_leve {
+  border-color: #f2dc9b;
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+}
+
+.class-chip.anomalia_grave {
+  border-color: #f3c4c4;
+  background: var(--bad-bg);
+  color: var(--bad-ink);
+}
+
+@media (max-width: 760px) {
+  .upload-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
+}

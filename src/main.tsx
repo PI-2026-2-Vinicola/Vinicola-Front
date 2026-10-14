@@ -17,6 +17,7 @@ import './styles/analysis.css';
 import './styles/landing.css';
 import './styles/pages.css';
 import './styles/app.css';
+import './styles/integrations.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
