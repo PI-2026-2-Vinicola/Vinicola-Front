@@ -5,7 +5,7 @@ import { chartableFields, fieldSeries, formatFieldValue, hoursSince, spansMultip
 import { validateImageFile } from './upload';
 import { filterByRisk, formatHarvest, formatWindow, monthsCovered } from './zarc';
 
-const entry = (createdAt: string, values: Record<string, number | null>): ThingSpeakEntry => ({ createdAt, entryId: null, values });
+const entry = (createdAt: string, values: Record<string, number | null>): ThingSpeakEntry => ({ createdAt, entryId: null, values, latitude: null, longitude: null });
 const field = (partial: Partial<ThingSpeakField>): ThingSpeakField => ({
   key: 'field1', name: 'Campo', unit: null, numeric: true, latest: null, latestText: null, latestAt: null, count: 0, min: null, max: null, avg: null, ...partial,
 });

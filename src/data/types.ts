@@ -326,6 +326,16 @@ export interface ThingSpeakEntry {
   createdAt: string;
   entryId: number | null;
   values: Record<string, number | null>;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+/** Última posição válida do dispositivo: lat/long do registro, campos Latitude/Longitude ou posição fixa do canal. */
+export interface ThingSpeakPosition {
+  latitude: number;
+  longitude: number;
+  at: string | null;
+  source: 'registro' | 'campos' | 'canal';
 }
 
 export interface ThingSpeakFeed {
@@ -339,6 +349,9 @@ export interface ThingSpeakFeed {
   lastEntryAt: string | null;
   fetchedAt: string | null;
   refreshSeconds: number;
+  position: ThingSpeakPosition | null;
+  /** Campos do canal usados como latitude/longitude (não entram nos gráficos). */
+  locationFields: string[];
   /** A API devolveu a última resposta válida porque o ThingSpeak falhou. */
   stale: boolean;
   warning: string | null;
@@ -361,19 +374,6 @@ export interface EmbrapaQuestion {
   epubUrl: string | null;
 }
 
-export type EmbrapaScope = 'grape' | 'all';
-
-export interface EmbrapaSearch {
-  query: string;
-  scope: EmbrapaScope;
-  bookId: string | null;
-  total: number;
-  totalIsExact: boolean;
-  page: number;
-  pageSize: number;
-  items: EmbrapaQuestion[];
-  fetchedAt: string;
-  source: string;
 /** Anomalia detectada pelo modelo cruzada com o livro de uva do RespondeAgro. */
 export interface AnomalyGuidance {
   anomaly: string;
@@ -395,6 +395,19 @@ export interface ReadingGuidance {
   source: string;
 }
 
+export type EmbrapaScope = 'grape' | 'all';
+
+export interface EmbrapaSearch {
+  query: string;
+  scope: EmbrapaScope;
+  bookId: string | null;
+  total: number;
+  totalIsExact: boolean;
+  page: number;
+  pageSize: number;
+  items: EmbrapaQuestion[];
+  fetchedAt: string;
+  source: string;
 }
 
 export interface AgritecCulture {

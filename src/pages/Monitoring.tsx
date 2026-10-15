@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ChartCard } from '../components/charts/ChartCard';
 import { TimeSeriesChart } from '../components/charts/Charts';
 import { PageHeader } from '../components/layout/PageHeader';
+import { DeviceMap } from '../components/map/DeviceMap';
 import { IntegrationPending, SourceNote } from '../components/ui/Integration';
 import { EmptyState, ErrorState, LoadingBlock } from '../components/ui/States';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +13,12 @@ import { useThingSpeak } from '../hooks/queries';
 import { formatDate, formatDateTime, formatNumber, formatRelative, formatTime } from '../lib/format';
 import { chartableFields, fieldSeries, formatFieldValue, hoursSince, SERIES_COLORS, spansMultipleDays, timeLabel } from '../lib/thingspeak';
 import { channelUrl, PERIOD_OPTIONS } from '../services/thingspeak';
+
+const POSITION_SOURCE = {
+  registro: 'Enviada pelo dispositivo a cada registro',
+  campos: 'Enviada pelo dispositivo nos campos Latitude/Longitude',
+  canal: 'Posição fixa informada nas configurações do canal',
+} as const;
 
 function NotConfigured({ admin }: { admin: boolean }) {
   return (
@@ -168,6 +175,25 @@ function ChannelView({ feed, period, onPeriod, updatedAt, fetching }: { feed: Th
           )}
         </>
       )}
+
+      <section className="card card-pad">
+        <h3 className="card-title">Localização do dispositivo</h3>
+        {feed.position ? (
+          <>
+            <p className="card-sub">
+              {POSITION_SOURCE[feed.position.source]}
+              {feed.position.at && <> · {formatDateTime(feed.position.at)} ({formatRelative(feed.position.at)})</>} · {feed.position.latitude.toLocaleString('pt-BR')},{' '}
+              {feed.position.longitude.toLocaleString('pt-BR')}
+            </p>
+            <DeviceMap position={feed.position} entries={feed.entries} />
+          </>
+        ) : (
+          <EmptyState icon={<MapPin aria-hidden="true" />} title="O canal não recebeu localização">
+            Para exibir a posição, o dispositivo deve enviar <code>lat</code> e <code>long</code> junto com os campos (ou campos chamados “Latitude” e “Longitude”), ou a posição
+            fixa deve ser informada nas configurações do canal.
+          </EmptyState>
+        )}
+      </section>
 
       <section className="card card-pad channel-info">
         <h3 className="card-title">Sobre o canal</h3>
