@@ -70,6 +70,7 @@ export const getSensor = (id: string) => http<Sensor>(`/sensors/${encodeURICompo
 export const createSensor = (data: SensorInput & { id: string }) => http<{ sensor: Sensor; deviceToken: string }>('/sensors', { method: 'POST', body: data });
 export const updateSensor = (id: string, data: Partial<SensorInput> & { active?: boolean; clearLocation?: boolean }) =>
   http<Sensor>(`/sensors/${encodeURIComponent(id)}`, { method: 'PATCH', body: data });
+export const deleteSensor = (id: string) => http<void>(`/sensors/${encodeURIComponent(id)}`, { method: 'DELETE' });
 export const regenerateSensorToken = (id: string) => http<{ sensor: Sensor; deviceToken: string }>(`/sensors/${encodeURIComponent(id)}/token`, { method: 'POST' });
 export const sensorEnvironment = (id: string, period: Pick<ReadingQuery, 'days' | 'dateFrom' | 'dateTo'>) =>
   http<EnvironmentPoint[]>(`/sensors/${encodeURIComponent(id)}/environment`, { query: { ...period, days: period.days ? Math.min(period.days, 366) : undefined } });

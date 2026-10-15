@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, Cpu, LayoutGrid, MapPin, MapPinOff, Plus, Rows3, Search } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../components/layout/PageHeader';
 import { SensorMap } from '../components/map/SensorMap';
+import { SensorActionButtons, SensorDeleteModal, SensorEditModal } from '../components/sensors/SensorActions';
 import { SensorForm, type SensorFormValues } from '../components/sensors/SensorForm';
 import { TokenReveal } from '../components/sensors/TokenReveal';
 import { SensorStatusBadge, VarietyTag } from '../components/ui/Badges';
@@ -65,6 +66,9 @@ export default function Sensors() {
   const [search, setSearch] = useState('');
   const [view, setView] = useState<'cards' | 'tabela'>('tabela');
   const [creating, setCreating] = useState(params.get('novo') === '1' && can('gerenciarSensores'));
+  const [editing, setEditing] = useState<Sensor | null>(null);
+  const [deleting, setDeleting] = useState<Sensor | null>(null);
+  const manage = can('gerenciarSensores');
 
   useEffect(() => {
     if (params.get('novo')) {
@@ -181,9 +185,12 @@ export default function Sensors() {
                       <SignalMeter dbm={sel.signal} />
                     </dd>
                   </dl>
-                  <Link to={`/sensores/${sel.id}`} className="btn btn-primary" style={{ marginTop: 'auto' }}>
-                    Detalhes e histórico <ArrowRight />
-                  </Link>
+                  <div className="sensor-panel-actions">
+                    {manage && <SensorActionButtons sensor={sel} onEdit={() => setEditing(sel)} onDelete={() => setDeleting(sel)} />}
+                    <Link to={`/sensores/${sel.id}`} className="btn btn-primary">
+                      Detalhes e histórico <ArrowRight />
+                    </Link>
+                  </div>
                 </>
               ) : (
                 <EmptyState compact icon={<MapPin aria-hidden="true" />} title="Selecione um sensor">
@@ -237,11 +244,19 @@ export default function Sensors() {
                       <th>Última leitura</th>
                       <th>Comunicação</th>
                       <th>Bateria / sinal</th>
+                      {manage && <th className="actions-col">Ações</th>}
                     </tr>
                   </thead>
                   <tbody>
                     {list.map((s) => (
-                      <SensorRow key={s.id} s={s} onOpen={() => navigate(`/sensores/${s.id}`)} onHover={() => setSelected(s.id)} />
+                      <SensorRow
+                        key={s.id}
+                        s={s}
+                        selected={s.id === selected}
+                        onOpen={() => navigate(`/sensores/${s.id}`)}
+                        onHover={() => setSelected(s.id)}
+                        actions={manage ? <SensorActionButtons compact sensor={s} onEdit={() => setEditing(s)} onDelete={() => setDeleting(s)} /> : null}
+                      />
                     ))}
                   </tbody>
                 </table>
@@ -249,7 +264,7 @@ export default function Sensors() {
             ) : (
               <div className="sensor-grid">
                 {list.map((s) => (
-                  <article key={s.id} className="card sensor-card" onClick={() => navigate(`/sensores/${s.id}`)} onMouseEnter={() => setSelected(s.id)} tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && navigate(`/sensores/${s.id}`)}>
+                  <article key={s.id} className={`card sensor-card ${s.id === selected ? 'is-selected' : ''}`} onClick={() => navigate(`/sensores/${s.id}`)} onMouseEnter={() => setSelected(s.id)} tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && navigate(`/sensores/${s.id}`)}>
                     <div className="sensor-card-head">
                       <div>
                         <h3>{s.name}</h3>
@@ -277,10 +292,11 @@ export default function Sensors() {
                       <BatteryMeter value={s.battery} />
                       <SignalMeter dbm={s.signal} />
                       {!s.hasValidLocation && (
-                        <span className="muted" title="Sem coordenadas">
-                          <MapPinOff size={14} />
+                        <span className="muted" title="Sem coordenadas — não aparece no mapa">
+                          <MapPinOff size={14} aria-label="Sem coordenadas" />
                         </span>
                       )}
+                      {manage && <SensorActionButtons compact sensor={s} onEdit={() => setEditing(s)} onDelete={() => setDeleting(s)} />}
                     </div>
                   </article>
                 ))}
@@ -290,13 +306,15 @@ export default function Sensors() {
         </>
       )}
       <NewSensorModal open={creating} onClose={() => setCreating(false)} />
+      <SensorEditModal sensor={editing} onClose={() => setEditing(null)} />
+      <SensorDeleteModal sensor={deleting} onClose={() => setDeleting(null)} onDeleted={(id) => id === selected && setSelected('')} />
     </div>
   );
 }
 
-function SensorRow({ s, onOpen, onHover }: { s: Sensor; onOpen: () => void; onHover: () => void }) {
+function SensorRow({ s, selected, onOpen, onHover, actions }: { s: Sensor; selected: boolean; onOpen: () => void; onHover: () => void; actions: ReactNode }) {
   return (
-    <tr onClick={onOpen} onMouseEnter={onHover} className="row-link" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onOpen()}>
+    <tr onClick={onOpen} onMouseEnter={onHover} className={`row-link ${selected ? 'is-selected' : ''}`} tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onOpen()}>
       <td data-label="Sensor">
         <strong>{s.name}</strong>
         <div className="mono muted small">{s.id}</div>
@@ -322,6 +340,11 @@ function SensorRow({ s, onOpen, onHover }: { s: Sensor; onOpen: () => void; onHo
           <SignalMeter dbm={s.signal} />
         </span>
       </td>
+      {actions && (
+        <td data-label="Ações" className="actions-col">
+          {actions}
+        </td>
+      )}
     </tr>
   );
 }

@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { BellRing, ChevronLeft, ChevronRight, Gauge, KeyRound, Pause, Pencil, Play, ScanSearch, Sparkles, Thermometer } from 'lucide-react';
+import { BellRing, ChevronLeft, ChevronRight, Gauge, KeyRound, Pause, Pencil, Play, ScanSearch, Sparkles, Thermometer, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ReadingListItem } from '../components/analysis/ReadingListItem';
 import { ReadingModal } from '../components/analysis/ReadingModal';
 import { ChartCard } from '../components/charts/ChartCard';
 import { AnalysesByDayChart, EnvironmentChart, QualityLegend, TelemetryChart } from '../components/charts/Charts';
 import { PageHeader, PageShell } from '../components/layout/PageHeader';
-import { SensorForm, type SensorFormValues } from '../components/sensors/SensorForm';
+import { SensorDeleteModal, SensorEditModal } from '../components/sensors/SensorActions';
 import { TokenReveal } from '../components/sensors/TokenReveal';
 import { SensorStatusBadge, VarietyTag } from '../components/ui/Badges';
 import { PeriodPicker } from '../components/ui/Filters';
@@ -104,23 +104,13 @@ export default function SensorDetail() {
   const [page, setPage] = useState(1);
   const readings = useReadings(f, page, 10);
   const [open, setOpen] = useState<Reading | null>(null);
-  const [modal, setModal] = useState<'edit' | 'token' | 'env' | 'toggle' | null>(null);
+  const [modal, setModal] = useState<'edit' | 'delete' | 'token' | 'env' | 'toggle' | null>(null);
+  const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(null);
 
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: keys.sensors });
   };
-  const edit = useMutation({
-    mutationFn: (v: SensorFormValues) => {
-      const { id: _id, lat, lng, ...rest } = v;
-      return updateSensor(id, lat === null ? { ...rest, clearLocation: true } : { ...rest, lat, lng });
-    },
-    onSuccess: () => {
-      refresh();
-      toast.success('Sensor atualizado.');
-      setModal(null);
-    },
-  });
   const regen = useMutation({ mutationFn: () => regenerateSensorToken(id), onSuccess: (r) => setToken(r.deviceToken) });
   const toggle = useMutation({
     mutationFn: (active: boolean) => updateSensor(id, { active }),
@@ -163,9 +153,14 @@ export default function SensorDetail() {
           <>
             <PeriodPicker value={period} from={from} to={to} onChange={setPeriod} />
             {can('gerenciarSensores') && (
-              <button className="btn btn-secondary" onClick={() => setModal('edit')}>
-                <Pencil /> Editar
-              </button>
+              <>
+                <button className="btn btn-secondary" onClick={() => setModal('edit')}>
+                  <Pencil /> Editar
+                </button>
+                <button className="btn btn-ghost btn-danger-text" onClick={() => setModal('delete')}>
+                  <Trash2 /> Excluir
+                </button>
+              </>
             )}
           </>
         }
@@ -323,12 +318,8 @@ export default function SensorDetail() {
       </section>
 
       <ReadingModal reading={open} onClose={() => setOpen(null)} />
-      <Modal open={modal === 'edit'} onClose={() => setModal(null)} label="Editar sensor" size="sm">
-        <div className="modal-body">
-          <h2 className="modal-title">Editar {s.id}</h2>
-          <SensorForm initial={s} onSubmit={(v) => edit.mutate(v)} submitting={edit.isPending} submitLabel="Salvar alterações" serverError={edit.isError ? errorMessage(edit.error) : null} />
-        </div>
-      </Modal>
+      <SensorEditModal sensor={modal === 'edit' ? s : null} onClose={() => setModal(null)} />
+      <SensorDeleteModal sensor={modal === 'delete' ? s : null} onClose={() => setModal(null)} onDeleted={() => navigate('/sensores', { replace: true })} />
       <Modal open={modal === 'env'} onClose={() => setModal(null)} label="Registrar medição" size="sm">
         <div className="modal-body">
           <h2 className="modal-title">Registrar medição ambiental</h2>

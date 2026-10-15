@@ -14,7 +14,21 @@ function parseCoord(v: string): number | null {
 }
 
 /** Formulário de cadastro/edição com validação local (a API valida novamente). */
-export function SensorForm({ initial, onSubmit, submitting, submitLabel, serverError }: { initial?: Sensor; onSubmit: (v: SensorFormValues) => void; submitting: boolean; submitLabel: string; serverError?: string | null }) {
+export function SensorForm({
+  initial,
+  onSubmit,
+  onCancel,
+  submitting,
+  submitLabel,
+  serverError,
+}: {
+  initial?: Sensor;
+  onSubmit: (v: SensorFormValues) => void;
+  onCancel?: () => void;
+  submitting: boolean;
+  submitLabel: string;
+  serverError?: string | null;
+}) {
   const [id, setId] = useState(initial?.id ?? '');
   const [name, setName] = useState(initial?.name ?? '');
   const [block, setBlock] = useState(initial?.block ?? '');
@@ -135,6 +149,11 @@ export function SensorForm({ initial, onSubmit, submitting, submitLabel, serverE
         </div>
       )}
       <div className="form-actions">
+        {onCancel && (
+          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={submitting}>
+            Cancelar
+          </button>
+        )}
         <button type="submit" className="btn btn-primary" disabled={submitting}>
           {submitting && <span className="spinner" aria-hidden="true" />}
           {submitLabel}

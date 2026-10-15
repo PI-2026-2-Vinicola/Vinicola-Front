@@ -779,3 +779,57 @@ code {
 .criteria-row .badge {
   align-self: flex-start;
 }
+
+/* ---------- Sensores: editar e excluir ---------- */
+.sensor-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sensor-actions .icon-btn {
+  width: 34px;
+  height: 34px;
+}
+
+.sensor-actions .icon-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.icon-btn-danger:hover {
+  background: var(--bad-bg);
+  color: var(--bad-ink);
+}
+
+/* Na tabela larga, a coluna de ações ocupa só o necessário; no celular a linha vira
+   "rótulo · valor" como as demais (.table-cards). */
+@media (min-width: 761px) {
+  .table .actions-col {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+  }
+}
+
+.row-link.is-selected td {
+  background: var(--rose-50);
+}
+
+.sensor-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.sensor-panel-actions .sensor-actions {
+  gap: 8px;
+}
+
+.sensor-foot .sensor-actions {
+  margin-left: auto;
+}
+
