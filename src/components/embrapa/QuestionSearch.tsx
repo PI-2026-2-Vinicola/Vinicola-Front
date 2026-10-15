@@ -10,7 +10,7 @@ import { EmptyState, ErrorState, LoadingBlock } from '../ui/States';
 
 const DEFAULT_TOPIC = TOPICS[0];
 
-function QuestionItem({ item }: { item: EmbrapaQuestion }) {
+export function QuestionItem({ item }: { item: EmbrapaQuestion }) {
   const [open, setOpen] = useState(false);
   const answerId = `resposta-${item.id}`;
   // questionHtml, snippetHtml e answerHtml chegam sanitizados pela API OASIS (lista de permissões em app/services/sanitize.py).

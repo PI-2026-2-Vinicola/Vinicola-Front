@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ReadingDetail } from '../components/analysis/ReadingDetail';
+import { ReadingGuidancePanel } from '../components/embrapa/ReadingGuidance';
 import { PageHeader, PageShell } from '../components/layout/PageHeader';
 import { Modal } from '../components/ui/Modal';
 import { ErrorState, errorMessage, LoadingBlock } from '../components/ui/States';
@@ -66,6 +67,7 @@ export default function ReadingPage() {
       <section className="card">
         <ReadingDetail reading={r} />
       </section>
+      <ReadingGuidancePanel reading={r} />
       <Modal open={confirm} onClose={() => setConfirm(false)} label="Excluir leitura" size="sm">
         <div className="modal-body">
           <h2 className="modal-title">Excluir a leitura {r.id}?</h2>

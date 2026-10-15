@@ -1,4 +1,4 @@
-import type { AgritecCulture, AgritecZarc, EmbrapaQuestion, EmbrapaScope, EmbrapaSearch, Municipality } from '../data/types';
+import type { AgritecCulture, AgritecZarc, EmbrapaQuestion, EmbrapaScope, EmbrapaSearch, Municipality, ReadingGuidance } from '../data/types';
 import { http } from './http';
 
 /**
@@ -9,6 +9,9 @@ export const searchQuestions = (q: string, page = 1, scope: EmbrapaScope = 'grap
   http<EmbrapaSearch>('/embrapa/questions', { query: { q, page, pageSize, scope }, anonymous: true });
 
 export const getQuestion = (id: string) => http<EmbrapaQuestion>(`/embrapa/questions/${encodeURIComponent(id)}`, { anonymous: true });
+
+/** Orientações da Embrapa para as anomalias detectadas em uma leitura (exige login, como a própria leitura). */
+export const getReadingGuidance = (code: string) => http<ReadingGuidance>(`/readings/${encodeURIComponent(code)}/embrapa`);
 
 export const getZarcCultures = () => http<AgritecCulture[]>('/embrapa/zarc/cultures', { anonymous: true });
 

@@ -82,6 +82,9 @@ export const useEmbrapaSearch = (q: string, page: number, scope: EmbrapaScope, e
     ...externalRetry,
   });
 
+export const useReadingGuidance = (code: string, enabled: boolean) =>
+  useQuery({ queryKey: ['embrapa', 'reading', code], queryFn: () => embrapa.getReadingGuidance(code), enabled: enabled && !!code, staleTime: 10 * 60_000, ...externalRetry });
+
 export const useZarcCultures = (enabled: boolean) => useQuery({ queryKey: ['embrapa', 'zarc-cultures'], queryFn: embrapa.getZarcCultures, enabled, staleTime: 60 * 60_000, ...externalRetry });
 
 export const useZarc = (cultureId: number | null, ibge: number | null) =>

@@ -374,6 +374,27 @@ export interface EmbrapaSearch {
   items: EmbrapaQuestion[];
   fetchedAt: string;
   source: string;
+/** Anomalia detectada pelo modelo cruzada com o livro de uva do RespondeAgro. */
+export interface AnomalyGuidance {
+  anomaly: string;
+  label: string;
+  confidence: number;
+  severe: boolean;
+  query: string;
+  total: number;
+  items: EmbrapaQuestion[];
+}
+
+export interface ReadingGuidance {
+  readingId: string;
+  modelVersion: string;
+  configured: boolean;
+  detail: string | null;
+  anomalies: AnomalyGuidance[];
+  fetchedAt: string | null;
+  source: string;
+}
+
 }
 
 export interface AgritecCulture {
