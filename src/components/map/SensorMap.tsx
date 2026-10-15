@@ -9,6 +9,8 @@ import { VARIETY_BY_ID } from '../../data/varieties';
 import { formatDateTime, formatPct, formatRelative } from '../../lib/format';
 import { SensorStatusBadge } from '../ui/Badges';
 import { EmptyState } from '../ui/States';
+import { AutoResize } from './AutoResize';
+import { TILES, type TileLayerId } from './tiles';
 
 const ICON_SVG: Record<Sensor['status'], string> = {
   online:
@@ -49,10 +51,6 @@ function FitAndFly({ sensors, target }: { sensors: Sensor[]; target?: Sensor }) 
   return null;
 }
 
-const TILES = {
-  mapa: { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', attribution: '&copy; OpenStreetMap &copy; CARTO' },
-  satelite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attribution: 'Imagens &copy; Esri' },
-};
 
 interface SensorMapProps {
   sensors: Sensor[];
@@ -63,7 +61,7 @@ interface SensorMapProps {
 
 /** Mapa com os sensores que têm coordenadas válidas; os demais são listados abaixo do mapa. */
 export function SensorMap({ sensors, selectedId, onSelect, height = 420 }: SensorMapProps) {
-  const [layer, setLayer] = useState<keyof typeof TILES>('mapa');
+  const [layer, setLayer] = useState<TileLayerId>('mapa');
   const located = useMemo(() => sensors.filter((s) => s.hasValidLocation), [sensors]);
   const missing = sensors.length - located.length;
   const selected = useMemo(() => located.find((s) => s.id === selectedId), [located, selectedId]);
@@ -80,8 +78,8 @@ export function SensorMap({ sensors, selectedId, onSelect, height = 420 }: Senso
   return (
     <div>
       <div className="map-shell" style={{ height }}>
-        <MapContainer center={[located[0].lat!, located[0].lng!]} zoom={16} scrollWheelZoom={false} className="map" attributionControl>
-          <TileLayer key={layer} url={TILES[layer].url} attribution={TILES[layer].attribution} maxZoom={19} />
+        <MapContainer center={[located[0].lat!, located[0].lng!]} zoom={16} maxZoom={19} scrollWheelZoom={false} className="map" attributionControl>
+          <TileLayer key={layer} url={TILES[layer].url} attribution={TILES[layer].attribution} maxZoom={TILES[layer].maxZoom} maxNativeZoom={TILES[layer].maxNativeZoom} />
           {located.map((s) => (
             <Marker key={s.id} position={[s.lat!, s.lng!]} icon={markerIcon(s, s.id === selectedId)} eventHandlers={{ click: () => onSelect?.(s.id) }}>
               <Popup className="sensor-popup" closeButton={false}>
@@ -115,6 +113,7 @@ export function SensorMap({ sensors, selectedId, onSelect, height = 420 }: Senso
             </Marker>
           ))}
           <FitAndFly sensors={located} target={selected} />
+          <AutoResize />
         </MapContainer>
         <div className="map-controls">
           <div className="segmented">

@@ -4,8 +4,9 @@ import { useEffect, useMemo } from 'react';
 import { CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet';
 import type { ThingSpeakEntry, ThingSpeakPosition } from '../../data/types';
 import { formatDateTime } from '../../lib/format';
+import { AutoResize } from './AutoResize';
+import { TILES } from './tiles';
 
-const TILE = { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', attribution: '&copy; OpenStreetMap &copy; CARTO' };
 
 const ICON = L.divIcon({
   className: '',
@@ -38,7 +39,7 @@ export function DeviceMap({ position, entries, height = 320 }: { position: Thing
   return (
     <div className="map-shell" style={{ height }}>
       <MapContainer center={current} zoom={16} scrollWheelZoom={false} className="map" attributionControl>
-        <TileLayer url={TILE.url} attribution={TILE.attribution} maxZoom={19} />
+        <TileLayer url={TILES.mapa.url} attribution={TILES.mapa.attribution} maxZoom={TILES.mapa.maxZoom} />
         {moved && <Polyline positions={points} pathOptions={{ color: '#a3325a', weight: 3, opacity: 0.6 }} />}
         {moved &&
           track.slice(0, -1).map((t) => (
@@ -60,6 +61,7 @@ export function DeviceMap({ position, entries, height = 320 }: { position: Thing
           </Popup>
         </Marker>
         <Fit points={points} />
+        <AutoResize />
       </MapContainer>
     </div>
   );
