@@ -7,7 +7,8 @@ import { VARIETIES } from '../../data/varieties';
 import { DISCLAIMER } from '../analysis/ReadingDetail';
 import { QualityBadge } from '../ui/Badges';
 import { Reveal } from '../ui/Reveal';
-import { GrapeScene } from './GrapeScene';
+import { VARIETY_PHOTOS } from '../../data/photos';
+import { Photo } from '../ui/Photo';
 
 export const CRITERIA_INFO = [
   { q: 'boa' as const, icon: CircleCheck, text: 'Características visuais dentro dos parâmetros esperados para a variedade.' },
@@ -28,8 +29,9 @@ export function CriteriaList({ variety }: { variety: Variety }) {
   );
 }
 
-export function GrapeImage({ variety, seed = 11 }: { variety: Variety; seed?: number }) {
-  return <GrapeScene className="scene" seed={seed} varietyId={variety.id} detections={[{ kind: 'cacho', label: '', confidence: 1, box: [0.3, 0.12, 0.4, 0.74] }]} showBoxes={false} title={`Ilustração de um cacho de ${variety.name}`} />;
+/** Fotografia real da variedade (Wikimedia Commons), com crédito do autor e da licença. */
+export function GrapeImage({ variety, eager = false, sizes }: { variety: Variety; eager?: boolean; sizes?: string }) {
+  return <Photo photo={VARIETY_PHOTOS[variety.id]} eager={eager} sizes={sizes} />;
 }
 
 /** Link para buscar a variedade nas perguntas e respostas da Embrapa (o resultado vem da API; pode não haver menções). */
@@ -50,7 +52,7 @@ export function VarietyLibrary() {
           ))}
         </div>
         <span className="muted" style={{ fontSize: 13.5 }}>
-          {list.length} variedades · descrições elaboradas pela equipe do projeto · imagens ilustrativas
+          {list.length} variedades · descrições elaboradas pela equipe do projeto · fotos do Wikimedia Commons (créditos na página Sobre)
         </span>
       </div>
 
@@ -59,7 +61,7 @@ export function VarietyLibrary() {
           <Reveal key={v.id} delay={(i % 3) * 80}>
             <article className="card card-hover grape-card" style={{ height: '100%' }}>
               <div className="grape-card-media">
-                <GrapeImage variety={v} seed={31 + i * 7} />
+                <GrapeImage variety={v} sizes="(max-width: 640px) 100vw, 400px" />
                 <div className="grape-card-tags">
                   <span className="badge">Uva {v.type.toLowerCase()}</span>
                 </div>

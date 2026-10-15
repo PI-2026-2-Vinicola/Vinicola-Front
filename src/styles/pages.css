@@ -833,3 +833,35 @@ code {
   margin-left: auto;
 }
 
+/* Cartões de variedade: cada seção (nome, descrição, ficha, características, critérios e links
+   para a variedade e para as perguntas da Embrapa) fica na mesma linha em todos os cartões
+   de uma fileira, e os links ficam sempre no rodapé. Sem suporte a subgrid, o rodapé ainda
+   desce para o fim do cartão (.grape-card-links usa margin-top: auto). */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 641px) {
+    .grape-cards > * {
+      display: grid;
+      grid-row: span 8;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
+
+    .grape-cards .grape-card {
+      display: grid;
+      grid-row: span 8;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
+
+    .grape-cards .grape-card-body {
+      display: grid;
+      grid-row: span 7;
+      grid-template-rows: subgrid;
+      row-gap: 14px;
+    }
+
+    .grape-cards .grape-card-links {
+      align-self: end;
+    }
+  }
+}

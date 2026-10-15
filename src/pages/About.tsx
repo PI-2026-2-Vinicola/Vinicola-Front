@@ -1,5 +1,6 @@
 import { ArchitectureMap, DocSection, ExtLink, FeatureStatus, StatusBadge } from '../components/about/AboutSections';
 import { PageHero } from '../components/layout/PageHero';
+import { PHOTO_CREDITS } from '../data/photos';
 import { useIntegrations } from '../hooks/queries';
 
 const TOC = [
@@ -12,6 +13,7 @@ const TOC = [
   ['fluxo', 'G', 'Fluxo de dados'],
   ['seguranca', 'H', 'Segurança e confiabilidade'],
   ['referencias', 'I', 'Referências'],
+  ['fotografias', 'J', 'Créditos das fotografias'],
 ] as const;
 
 const MODEL_CLASSES = [
@@ -338,6 +340,21 @@ export default function About() {
                   </div>
                 ))}
               </div>
+            </DocSection>
+
+            <DocSection id="fotografias" letter="J" title="Créditos das fotografias">
+              <p>
+                As fotos de uvas e videiras são fotografias reais publicadas no Wikimedia Commons sob licenças Creative Commons, que permitem o uso com atribuição. As cópias usadas
+                no site foram apenas redimensionadas; o autor e a licença de cada uma estão na lista abaixo.
+              </p>
+              <ul className="ref-list photo-credits">
+                {PHOTO_CREDITS.map((p) => (
+                  <li key={p.source}>
+                    <strong>{p.caption}</strong> — foto de {p.author}, <ExtLink href={p.licenseUrl}>{p.license}</ExtLink> ·{' '}
+                    <ExtLink href={p.source}>arquivo original</ExtLink>
+                  </li>
+                ))}
+              </ul>
             </DocSection>
           </div>
         </div>

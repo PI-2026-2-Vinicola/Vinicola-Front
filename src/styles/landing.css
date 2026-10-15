@@ -220,3 +220,32 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Cartões da faixa com a mesma altura, mesmo quando a cor ocupa duas linhas. */
+.grape-rail > * {
+  display: flex;
+}
+
+.grape-mini {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.grape-mini div.txt {
+  flex: 1;
+}
+
+/* Cartões estreitos: o crédito quebra a linha em vez de cortar a licença. */
+.grape-mini .photo-credit {
+  right: 6px;
+  bottom: 6px;
+  max-width: calc(100% - 12px);
+  padding: 2px 6px;
+  font-size: 10px;
+  white-space: normal;
+}
+
+.home-hero-frame .photo {
+  border-radius: 20px;
+}

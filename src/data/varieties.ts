@@ -189,12 +189,3 @@ export const varietyName = (id: VarietyId) => VARIETY_BY_ID[id]?.name ?? id;
 /** Rótulo de classe do modelo YOLO (snake_case, como no dataset de treinamento). */
 export const yoloClass = (id: VarietyId) => id.replace(/-/g, '_');
 
-/** Tons usados na ilustração procedural das bagas (escuro, médio, claro) e se a variedade tem pruína. */
-export const GRAPE_TONES: Record<VarietyId, { dark: string; mid: string; light: string; bloom: boolean }> = {
-  'cabernet-sauvignon': { dark: '#150c24', mid: '#2e1f4c', light: '#6a5a92', bloom: true },
-  syrah: { dark: '#110b20', mid: '#271d45', light: '#5d5288', bloom: true },
-  tempranillo: { dark: '#1d0a22', mid: '#3f1a40', light: '#7a4470', bloom: true },
-  'touriga-nacional': { dark: '#100e2a', mid: '#262458', light: '#5c5a9c', bloom: true },
-  'chenin-blanc': { dark: '#8d9d3c', mid: '#c4cf70', light: '#f0f4c4', bloom: false },
-  'moscato-canelli': { dark: '#b58a2c', mid: '#e0bf62', light: '#faebb0', bloom: false },
-};

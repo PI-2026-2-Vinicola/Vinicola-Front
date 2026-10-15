@@ -39,7 +39,7 @@ export default function GrapeDetail() {
             </Link>
           </div>
           <div className="grape-hero-media" style={{ animation: 'fadeUp .8s .1s var(--ease) both' }}>
-            <GrapeImage variety={variety} seed={77 + index} />
+            <GrapeImage variety={variety} eager sizes="420px" />
           </div>
         </div>
       </section>

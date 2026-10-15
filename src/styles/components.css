@@ -1014,3 +1014,73 @@
 .reveal > section.card {
   height: 100%;
 }
+
+/* ---------- Fotografias (src/components/ui/Photo.tsx) ---------- */
+.photo {
+  position: relative;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.photo-img {
+  display: block;
+  object-fit: cover;
+}
+
+.photo-fallback {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  background: linear-gradient(160deg, #4a2a3a, #2b1622);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.photo-fallback svg {
+  width: 34px;
+  height: 34px;
+  opacity: 0.8;
+}
+
+/* Crédito obrigatório pelas licenças CC BY / CC BY-SA. */
+.photo-credit {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+  max-width: calc(100% - 16px);
+  padding: 3px 8px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.58);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.photo-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- Texto corrido dos cards: justificado ----------
+   Só parágrafos de conteúdo (sem classe própria) e descrições conhecidas. Títulos, rótulos,
+   números, botões e estados vazios mantêm o alinhamento próprio. A última linha fica à
+   esquerda, então frases de uma linha não ganham espaços extras entre as palavras. */
+:where(.card, .step-item, .vale-callout, .phenology-card, .flow-cards > div) p:not([class]),
+.learn-text p,
+.feature p,
+.qa-snippet,
+.text-justify {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: manual; /* sem quebra de palavras com hífen */
+  overflow-wrap: break-word;
+}

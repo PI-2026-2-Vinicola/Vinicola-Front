@@ -22,8 +22,9 @@ import { useAuth } from '../../context/AuthContext';
 import { VARIETIES } from '../../data/varieties';
 import { usePublicOverview } from '../../hooks/queries';
 import { formatNumber, formatRelative } from '../../lib/format';
-import { GrapeScene } from '../grape/GrapeScene';
+import { HERO_PHOTO, VARIETY_PHOTOS } from '../../data/photos';
 import { VineyardRows } from '../landing/VineyardRows';
+import { Photo } from '../ui/Photo';
 import { Reveal } from '../ui/Reveal';
 import { SectionHead } from '../ui/SectionHead';
 
@@ -67,8 +68,7 @@ export function HomeHero() {
         </div>
         <div className="home-hero-visual">
           <div className="home-hero-frame">
-            <GrapeScene className="scene" seed={23} varietyId="syrah" detections={[{ kind: 'cacho', label: '', confidence: 1, box: [0.3, 0.12, 0.4, 0.74] }]} showBoxes={false} title="Ilustração de um cacho de uva na videira" />
-            <span className="illustration-tag">Ilustração</span>
+            <Photo photo={HERO_PHOTO} eager sizes="(max-width: 900px) 100vw, 560px" />
           </div>
           <div className="float-card home-hero-card">
             <div className="fr-title">O que você encontra aqui</div>
@@ -191,9 +191,9 @@ export function LearnGrapes() {
           <div className="grape-rail">
             {VARIETIES.map((v, i) => (
               <Reveal key={v.id} delay={i * 60}>
-                <Link to={`/uvas/${v.id}`} className="grape-mini" style={{ display: 'block' }}>
+                <Link to={`/uvas/${v.id}`} className="grape-mini">
                   <div className="grape-mini-media">
-                    <GrapeScene className="scene" seed={1000 + i * 17} varietyId={v.id} detections={[{ kind: 'cacho', label: '', confidence: 1, box: [0.2, 0.16, 0.6, 0.72] }]} showBoxes={false} title={`Ilustração — ${v.name}`} />
+                    <Photo photo={VARIETY_PHOTOS[v.id]} sizes="(max-width: 560px) 50vw, (max-width: 1100px) 33vw, 200px" />
                   </div>
                   <div className="txt">
                     <strong>{v.name}</strong>
