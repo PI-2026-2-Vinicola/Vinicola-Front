@@ -50,3 +50,20 @@ export function detectionSource(kind: AnalysisKind, detectionKind: 'cacho' | 'an
   if (kind === 'demo') return 'Sintético';
   return '—';
 }
+
+/** Comparação entre a variedade prevista pela foto e a cadastrada no talhão. */
+export type VarietyAgreement = 'confere' | 'diverge' | 'fora_catalogo' | 'baixa_confianca';
+
+export function varietyAgreement(predicted: string, confidence: number, plotVarietyId: string, catalogIds: readonly string[]): VarietyAgreement {
+  if (confidence < 0.5) return 'baixa_confianca';
+  const id = predicted.replace(/_/g, '-');
+  if (!catalogIds.includes(id)) return 'fora_catalogo';
+  return id === plotVarietyId ? 'confere' : 'diverge';
+}
+
+export const AGREEMENT_TEXT: Record<VarietyAgreement, string> = {
+  confere: 'Confere com o talhão',
+  diverge: 'Diferente do talhão — vale conferir em campo',
+  fora_catalogo: 'Variedade fora do catálogo da OASIS',
+  baixa_confianca: 'Baixa confiança — previsão incerta',
+};

@@ -1,5 +1,5 @@
 import { BrainCircuit, ClipboardList, Palette, Ruler } from 'lucide-react';
-import type { AnalysisComponent, AnalysisModel, ModelCard, ModelMetrics } from '../../data/types';
+import type { AnalysisComponent, AnalysisModel, ModelCard, ModelMetrics, VarietyModel } from '../../data/types';
 import { DETECTOR_LABEL } from '../../lib/analysis';
 import { formatPct } from '../../lib/format';
 
@@ -92,6 +92,41 @@ function CardSummary({ card }: { card: ModelCard }) {
   );
 }
 
+function VarietySummary({ model }: { model: VarietyModel }) {
+  return (
+    <div className="model-card">
+      <div className="field-label">
+        <Ruler aria-hidden="true" /> Variedades · {model.name} {model.version} ({model.architecture})
+      </div>
+      <div className="class-chips">
+        {model.classes.map((c) => (
+          <span key={c.name} className="class-chip variedade" title={c.name}>
+            {c.label}
+            {!c.inCatalog && <em> · fora do catálogo</em>}
+          </span>
+        ))}
+      </div>
+      <p>
+        No teste, que o modelo não viu no treino, acertou a variedade de{' '}
+        <strong>{model.photoAccuracy != null ? formatPct(model.photoAccuracy) : '—'}</strong> das fotos ({model.testPhotos ?? '—'} fotos, votando entre os cachos
+        detectados) e {model.accuracy != null ? formatPct(model.accuracy) : '—'} dos cachos individuais (acurácia balanceada{' '}
+        {model.balancedAccuracy != null ? formatPct(model.balancedAccuracy) : '—'}).
+      </p>
+      {Object.keys(model.perClassRecall).length > 0 && (
+        <p className="muted small">
+          Acerto por variedade (cachos):{' '}
+          {model.classes.map((c) => `${c.label} ${formatPct(model.perClassRecall[c.name] ?? 0)}`).join(' · ')}. Dados: {model.dataset}. {model.license}
+        </p>
+      )}
+      <ul className="bullets">
+        {model.limitations.map((l) => (
+          <li key={l}>{l}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** O que o detector em uso consegue identificar — somente o que a API informa — e de onde vem cada parte do resultado. */
 export function ModelInfo({ model }: { model: AnalysisModel }) {
   const Icon = model.yoloLoaded ? BrainCircuit : Palette;
@@ -112,6 +147,7 @@ export function ModelInfo({ model }: { model: AnalysisModel }) {
         <p>{model.description}</p>
         {model.components.length > 0 && <Components items={model.components} />}
         {model.card && <CardSummary card={model.card} />}
+        {model.varietyModel && <VarietySummary model={model.varietyModel} />}
         {groups.map((g) => (
           <div key={g.kind}>
             <div className="field-label">{KIND_TITLE[g.kind]}</div>

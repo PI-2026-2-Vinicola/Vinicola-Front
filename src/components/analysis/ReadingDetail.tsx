@@ -10,6 +10,7 @@ import { formatDate, formatTime } from '../../lib/format';
 import { ReadingImage } from '../reading/ReadingImage';
 import { ClassificationBadge, QualityBadge, SourceBadge } from '../ui/Badges';
 import { ConfidenceBar } from '../ui/ConfidenceBar';
+import { PredictedVariety } from './PredictedVariety';
 import { YoloResult } from './YoloResult';
 
 export const DISCLAIMER = 'Esta classificação é baseada na análise computacional da imagem e não substitui a avaliação agronômica profissional.';
@@ -77,12 +78,14 @@ export function ReadingDetail({ reading, onNavigate, infoOnly = false }: { readi
               Uva {variety.type.toLowerCase()} · {variety.color}
             </p>
           )}
-          {plotVariety && (
+          {plotVariety && !reading.predictedVariety && (
             <p className="field-hint reading-title-hint">
               Variedade cadastrada no sensor do talhão — não identificada pela foto.
             </p>
           )}
         </div>
+
+        <PredictedVariety reading={reading} />
 
         <div className="info-block">
           <div className="field-label">{CONFIDENCE_LABEL[kind]}</div>

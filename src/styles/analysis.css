@@ -268,3 +268,52 @@
     min-width: 0;
   }
 }
+
+.predicted-variety {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+
+.predicted-variety .field-label svg {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+}
+
+.predicted-variety-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.predicted-variety-main .mono {
+  font-size: 14px;
+  color: var(--ink-500);
+}
+
+.predicted-variety-badge {
+  font-size: 12px;
+}
+
+.agreement-confere .predicted-variety-badge {
+  background: var(--ok-bg, #e7f5ec);
+  color: var(--ok-ink, #1f6b3a);
+}
+
+.agreement-diverge .predicted-variety-badge,
+.agreement-baixa_confianca .predicted-variety-badge {
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+}
+
+.agreement-fora_catalogo .predicted-variety-badge {
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-600);
+}

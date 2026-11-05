@@ -46,6 +46,10 @@ export interface Reading {
   modelVersion: string;
   processingMs: number;
   stage: PipelineStage;
+  /** Variedade prevista pela foto (classificador YOLO de variedades). `varietyId` continua sendo a do talhão. */
+  predictedVariety?: string | null;
+  predictedVarietyName?: string | null;
+  varietyConfidence?: number | null;
 }
 
 export interface Page<T> {
@@ -333,6 +337,23 @@ export interface AnalysisModel {
   limitations: string[];
   components: AnalysisComponent[];
   card: ModelCard | null;
+  varietyModel?: VarietyModel | null;
+}
+
+/** Classificador de variedades em uso (models/oasis-variedades.json na API). */
+export interface VarietyModel {
+  name: string;
+  version: string;
+  architecture: string;
+  classes: { name: string; label: string; inCatalog: boolean }[];
+  accuracy: number | null;
+  balancedAccuracy: number | null;
+  photoAccuracy: number | null;
+  testPhotos: number | null;
+  perClassRecall: Record<string, number>;
+  dataset: string;
+  license: string;
+  limitations: string[];
 }
 
 /* ------------------------------------------------------------------ integrações externas */

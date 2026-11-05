@@ -9,6 +9,9 @@ export function YoloResult({ reading }: { reading: Reading }) {
   const kind = analysisKind(reading.modelVersion);
   const rows: [string, string, string?][] = [
     [VARIETY_ROW_LABEL[kind], VARIETY_BY_ID[reading.varietyId]?.name ?? reading.varietyId],
+    ...(reading.predictedVariety && reading.varietyConfidence != null
+      ? ([['Variedade prevista pela foto', `${reading.predictedVarietyName ?? reading.predictedVariety} (${formatPct(reading.varietyConfidence)})`]] as [string, string][])
+      : []),
     [CONFIDENCE_LABEL[kind], formatPct(reading.confidence)],
     ['Condição visual', reading.visualCondition],
     ['Maturação', MATURATION_LABEL[reading.maturation] ?? reading.maturation],
