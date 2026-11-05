@@ -22,6 +22,8 @@ export function ReadingDetail({ reading, onNavigate, infoOnly = false }: { readi
   const matIndex = MATURATION_ORDER.indexOf(reading.maturation);
   const hasImage = !!reading.imageUrl;
   const kind = analysisKind(reading.modelVersion);
+  // A variedade vem do cadastro do talhão (e não da foto) na análise de cor e no modelo de cachos.
+  const plotVariety = kind === 'cluster' || kind === 'color';
 
   return (
     <div className={`reading-detail ${infoOnly ? 'reading-detail--info' : ''}`}>
@@ -67,10 +69,17 @@ export function ReadingDetail({ reading, onNavigate, infoOnly = false }: { readi
             <ClassificationBadge value={reading.classification} />
             <SourceBadge source={reading.source} />
           </div>
-          <h2 className="reading-title">{variety?.name ?? reading.varietyId}</h2>
+          <h2 className="reading-title">
+            {plotVariety ? `Talhão de ${variety?.name ?? reading.varietyId}` : (variety?.name ?? reading.varietyId)}
+          </h2>
           {variety && (
             <p className="muted">
               Uva {variety.type.toLowerCase()} · {variety.color}
+            </p>
+          )}
+          {plotVariety && (
+            <p className="field-hint reading-title-hint">
+              Variedade cadastrada no sensor do talhão — não identificada pela foto.
             </p>
           )}
         </div>
