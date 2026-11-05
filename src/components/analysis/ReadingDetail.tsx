@@ -50,7 +50,7 @@ export function ReadingDetail({ reading, onNavigate, infoOnly = false }: { readi
               {reading.detections.map((d, i) => (
                 <li key={i}>
                   <span className={`det-swatch ${d.kind === 'cacho' ? 'cluster' : SEVERE_ANOMALIES.has(d.label) ? 'severe' : 'mild'}`} />
-                  <span>{d.kind === 'cacho' ? `Cacho (${VARIETY_BY_ID[d.label.replace(/_/g, '-') as keyof typeof VARIETY_BY_ID]?.name ?? d.label})` : (ANOMALY_LABEL[d.label] ?? d.label)}</span>
+                  <span>{d.kind === 'cacho' ? (kind === 'cluster' ? 'Cacho de uva' : `Cacho (${VARIETY_BY_ID[d.label.replace(/_/g, '-') as keyof typeof VARIETY_BY_ID]?.name ?? d.label})`) : (ANOMALY_LABEL[d.label] ?? d.label)}</span>
                   <small className="det-source">{detectionSource(kind, d.kind)}</small>
                   <span className="mono" style={{ marginLeft: 'auto' }}>
                     {(d.confidence * 100).toFixed(0)}%
@@ -97,8 +97,11 @@ export function ReadingDetail({ reading, onNavigate, infoOnly = false }: { readi
           )}
           {kind === 'cluster' && (
             <p className="field-hint">
-              <strong>Previsão do modelo:</strong> confiança estimada pelo YOLO de que a caixa principal contém um cacho de uva. A variedade é a cadastrada no talhão (o modelo
-              não identifica variedades) e as anomalias vêm da análise de cor feita dentro de cada cacho detectado.
+              <strong>Previsão do modelo:</strong> confiança estimada pelo YOLO de que a caixa principal contém um cacho de uva.{' '}
+              {reading.predictedVariety
+                ? 'A variedade pela foto vem do modelo de variedades (acima); a da leitura continua sendo a do talhão.'
+                : 'A variedade é a cadastrada no talhão (sem previsão de variedade para esta foto).'}{' '}
+              As anomalias vêm da análise de cor feita dentro de cada cacho detectado.
             </p>
           )}
         </div>

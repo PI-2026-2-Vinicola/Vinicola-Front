@@ -27,8 +27,9 @@ export function AnalysisComparison({ reading }: { reading: Reading }) {
 
 /** Quantidade e confiança por classe detectada, ou a orientação quando nada foi identificado. */
 export function DetectionSummary({ reading, anomalyMinConfidence = 0.5 }: { reading: Reading; anomalyMinConfidence?: number }) {
-  const summary = summarizeDetections(reading.detections);
   const kind = analysisKind(reading.modelVersion);
+  // No modelo de cachos, o rótulo gravado é a variedade do talhão: aqui o cacho aparece sem variedade.
+  const summary = summarizeDetections(reading.detections, kind === 'cluster');
   if (summary.length === 0)
     return (
       <div className="notice notice-warn detection-empty">
