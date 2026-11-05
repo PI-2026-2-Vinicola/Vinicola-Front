@@ -44,7 +44,7 @@ VITE_API_URL=https://api.suaempresa.com.br npm run build
 | `/dashboard` | admin, gestor | Indicadores do período com comparação ao período anterior, ambiente (temperatura/umidade), gráficos por dia/hora, evolução, sensores, variedades, mapa, alertas e últimas leituras |
 | `/sensores` | admin, gestor | Mapa com coordenadas reais, status calculado, filtros por status/bloco/busca, tabela e cartões; cadastro de sensor (admin) com exibição única do token |
 | `/sensores/:id` | admin, gestor | Indicadores, leituras por dia, condições ambientais, bateria e sinal, leituras paginadas; editar, gerar token, desativar, registrar medição |
-| `/analises` | todos | **Enviar imagem** (escolha → validação de formato, tamanho, HEIC e arquivo corrompido → prévia → análise na API → imagem enviada × imagem com caixas, detecções por classe com quantidade e confiança, orientação quando nada é detectado; detector em uso e suas classes informados pela API) e **Painel analítico** filtrável |
+| `/analises` | todos | **Enviar imagem** (escolha → validação de formato, tamanho, HEIC e arquivo corrompido → prévia → análise na API → imagem enviada × imagem com caixas, detecções por classe com quantidade e confiança, orientação quando nada é detectado; ficha do modelo em uso — dados de treino do Embrapa WGISD, métricas de teste, o que cada parte decide e limitações — informada pela API) e **Painel analítico** filtrável |
 | `/classificacao` | todos | Resultado por variedade (quantidade, % por classificação, confiança), filtro por tipo e período, evolução e maturação |
 | `/historico`, `/historico/:id` | todos | Histórico paginado no servidor com filtros combináveis (período, sensor, bloco, variedade, qualidade, classificação, maturação, origem, busca), ordenação, exportação CSV, detalhe e exclusão (admin) |
 | `/importacao` | admin, gestor | Importação de leituras, sensores e medições (CSV, Excel, JSON) com pré-visualização validada pelo servidor, tratamento de duplicados e histórico de importações |
@@ -94,7 +94,8 @@ Integrações têm, além disso, o estado **não configurado** (explica o que o 
 - A área autenticada segue o estilo da página inicial: menu transparente centralizado no topo (ganha fundo ao rolar), faixa vinho com sobretítulo e título em Fraunces, e cartões sobrepostos à faixa. Em telas menores o menu vira o botão ☰.
 - Tipografia Fraunces (títulos da página pública) e Inter (interface).
 - As figuras de cachos da página inicial e da biblioteca são ilustrações vetoriais e estão marcadas como tal; nas leituras, a imagem exibida é a foto real processada pela API.
-- Com a análise de cor (sem modelo YOLO treinado), o resultado mostra “Variedade (cadastro do talhão)” e “Índice da análise” em vez de “Uva identificada” e “Confiança”, porque a variedade não é reconhecida pela imagem e o índice não é uma probabilidade.
+- Com o modelo de cachos publicado na API (YOLO26n treinado com fotos reais do Embrapa WGISD), o resultado mostra “Confiança do modelo (cacho principal)”, “Variedade (cadastro do talhão)” — o modelo localiza os cachos, mas não identifica variedades — e a origem de cada detecção (“Modelo YOLO” para os cachos, “Análise de cor” para as anomalias), com o aviso de que o resultado é uma previsão do modelo.
+- Com a análise de cor sozinha (sem modelo), o resultado mostra “Variedade (cadastro do talhão)” e “Índice da análise de cor” em vez de “Uva identificada” e “Confiança”, porque a variedade não é reconhecida pela imagem e o índice não é uma probabilidade.
 
 ---
 

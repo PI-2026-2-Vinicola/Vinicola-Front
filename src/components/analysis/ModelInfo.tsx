@@ -1,5 +1,5 @@
 import { BrainCircuit, ClipboardList, Palette, Ruler } from 'lucide-react';
-import type { AnalysisComponent, AnalysisModel, ModelCard } from '../../data/types';
+import type { AnalysisComponent, AnalysisModel, ModelCard, ModelMetrics } from '../../data/types';
 import { DETECTOR_LABEL } from '../../lib/analysis';
 import { formatPct } from '../../lib/format';
 
@@ -10,6 +10,14 @@ const KIND_TITLE = {
   anomalia_grave: 'Anomalias graves',
 } as const;
 const SOURCE_TITLE = { modelo: 'modelo treinado', analise_cor: 'regra de cor' } as const;
+const METRIC_ROWS: [keyof ModelMetrics, string][] = [
+  ['precision', 'Precisão'],
+  ['recall', 'Recall'],
+  ['f1', 'F1'],
+  ['map50', 'mAP50'],
+  ['map5095', 'mAP50-95'],
+];
+const decimal = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const COMPONENT_ICON = { modelo: BrainCircuit, cadastro: ClipboardList, regra: Palette };
 
 function Components({ items }: { items: AnalysisComponent[] }) {
@@ -50,28 +58,26 @@ function CardSummary({ card }: { card: ModelCard }) {
       {card.metrics.length > 0 && (
         <div className="table-wrap">
           <table className="table model-metrics">
-            <caption className="sr-only">Métricas do modelo</caption>
+            <caption className="sr-only">Métricas do modelo por conjunto de imagens</caption>
             <thead>
               <tr>
-                <th>Conjunto</th>
-                <th className="num">Imagens</th>
-                <th className="num">Precisão</th>
-                <th className="num">Recall</th>
-                <th className="num">F1</th>
-                <th className="num">mAP50</th>
-                <th className="num">mAP50-95</th>
+                <th>Métrica</th>
+                {card.metrics.map((m) => (
+                  <th key={m.split} className="num">
+                    {m.split} <small>({m.images} fotos)</small>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {card.metrics.map((m) => (
-                <tr key={m.split}>
-                  <td>{m.split}</td>
-                  <td className="num">{m.images}</td>
-                  <td className="num">{formatPct(m.precision)}</td>
-                  <td className="num">{formatPct(m.recall)}</td>
-                  <td className="num">{formatPct(m.f1)}</td>
-                  <td className="num">{formatPct(m.map50)}</td>
-                  <td className="num">{formatPct(m.map5095)}</td>
+              {METRIC_ROWS.map(([key, label]) => (
+                <tr key={key}>
+                  <td>{label}</td>
+                  {card.metrics.map((m) => (
+                    <td key={m.split} className="num">
+                      {formatPct(m[key] as number)}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -79,7 +85,7 @@ function CardSummary({ card }: { card: ModelCard }) {
         </div>
       )}
       <p className="muted small">
-        Precisão, recall e F1 no limiar de confiança {card.metrics[0]?.confidence.toFixed(2)} (IoU 0,5), medidos com o mesmo código de inferência da API em imagens que
+        Precisão, recall e F1 no limiar de confiança {card.metrics[0] ? decimal(card.metrics[0].confidence) : '—'} (IoU 0,5), medidos com o mesmo código de inferência da API em imagens que
         não foram usadas no treino. {card.inferenceMsCpu ? `Inferência em CPU: cerca de ${Math.round(card.inferenceMsCpu)} ms por foto.` : ''} {card.license}
       </p>
     </div>
