@@ -721,6 +721,72 @@
   color: var(--ink-700);
 }
 
+.class-chip.cacho {
+  border-color: #d9c2cc;
+  background: var(--wine-50, #f8eef2);
+  color: var(--wine-700, #5c1630);
+}
+
+.class-chip em {
+  font-style: normal;
+  color: var(--ink-400);
+  font-size: 11.5px;
+}
+
+.model-components {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.model-components li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.model-components svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  color: var(--wine-500);
+}
+
+.model-components strong {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-800, var(--ink-700));
+}
+
+.model-components small {
+  display: block;
+  color: var(--ink-500);
+}
+
+.model-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+}
+
+.model-card .field-label svg {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+}
+
+.model-metrics th,
+.model-metrics td {
+  padding: 6px 8px;
+  font-size: 12.5px;
+}
+
 .class-chip.anomalia_leve {
   border-color: #f2dc9b;
   background: var(--warn-bg);

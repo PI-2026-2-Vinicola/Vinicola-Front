@@ -259,10 +259,62 @@ export interface SystemStatus {
 
 /* ------------------------------------------------------------------ análise de imagem: modelo em uso */
 export interface ModelClass {
-  /** Rótulo do modelo (ex.: syrah, podridao). */
+  /** Rótulo do modelo (ex.: cacho, syrah, podridao). */
   name: string;
   label: string;
-  kind: 'variedade' | 'anomalia_leve' | 'anomalia_grave';
+  kind: 'cacho' | 'variedade' | 'anomalia_leve' | 'anomalia_grave';
+  /** Quem produz a classe: o modelo treinado ou a regra de análise de cor. */
+  source: 'modelo' | 'analise_cor';
+}
+
+/** O que cada parte da análise decide e de onde vem a informação. */
+export interface AnalysisComponent {
+  item: string;
+  source: string;
+  kind: 'modelo' | 'cadastro' | 'regra';
+}
+
+export interface ModelMetrics {
+  split: string;
+  images: number;
+  instances: number;
+  precision: number;
+  recall: number;
+  f1: number;
+  map50: number;
+  map5095: number;
+  /** Limiar de confiança em que precisão, recall e F1 foram medidos. */
+  confidence: number;
+}
+
+/** Ficha do modelo em uso (models/<nome>.json na API). */
+export interface ModelCard {
+  name: string;
+  version: string;
+  task: string;
+  architecture: string;
+  framework: string;
+  inputSize: number;
+  trainedAt: string;
+  pretrained: boolean;
+  epochs: number | null;
+  metrics: ModelMetrics[];
+  dataset: {
+    name: string;
+    sourceUrl: string;
+    version: string;
+    license: string;
+    licenseUrl: string | null;
+    institution: string;
+    description: string;
+    images: Record<string, number>;
+    instances: Record<string, number>;
+    varieties: string[];
+    capture: string;
+  };
+  license: string;
+  inferenceMsCpu: number | null;
+  sha256: string;
 }
 
 export interface AnalysisModel {
@@ -279,6 +331,8 @@ export interface AnalysisModel {
   acceptedFormats: string[];
   timeoutSeconds: number;
   limitations: string[];
+  components: AnalysisComponent[];
+  card: ModelCard | null;
 }
 
 /* ------------------------------------------------------------------ integrações externas */

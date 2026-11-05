@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ANOMALY_LABEL, MATURATION_LABEL, MATURATION_ORDER, SEVERE_ANOMALIES } from '../../data/labels';
 import type { Reading } from '../../data/types';
 import { VARIETY_BY_ID } from '../../data/varieties';
-import { analysisKind } from '../../lib/analysis';
+import { analysisKind, CONFIDENCE_LABEL, detectionSource } from '../../lib/analysis';
 import { formatDate, formatTime } from '../../lib/format';
 import { ReadingImage } from '../reading/ReadingImage';
 import { ClassificationBadge, QualityBadge, SourceBadge } from '../ui/Badges';
@@ -48,6 +48,7 @@ export function ReadingDetail({ reading, onNavigate, infoOnly = false }: { readi
                 <li key={i}>
                   <span className={`det-swatch ${d.kind === 'cacho' ? 'cluster' : SEVERE_ANOMALIES.has(d.label) ? 'severe' : 'mild'}`} />
                   <span>{d.kind === 'cacho' ? `Cacho (${VARIETY_BY_ID[d.label.replace(/_/g, '-') as keyof typeof VARIETY_BY_ID]?.name ?? d.label})` : (ANOMALY_LABEL[d.label] ?? d.label)}</span>
+                  <small className="det-source">{detectionSource(kind, d.kind)}</small>
                   <span className="mono" style={{ marginLeft: 'auto' }}>
                     {(d.confidence * 100).toFixed(0)}%
                   </span>
@@ -75,11 +76,17 @@ export function ReadingDetail({ reading, onNavigate, infoOnly = false }: { readi
         </div>
 
         <div className="info-block">
-          <div className="field-label">{kind === 'color' ? 'Índice da análise de cor' : 'Confiança da detecção'}</div>
+          <div className="field-label">{CONFIDENCE_LABEL[kind]}</div>
           <ConfidenceBar value={reading.confidence} large />
           {kind === 'color' && (
             <p className="field-hint">
               Calculado pela proporção de pixels com cor de baga na região do cacho; não é a probabilidade de um modelo treinado. A variedade é a cadastrada no talhão do sensor.
+            </p>
+          )}
+          {kind === 'cluster' && (
+            <p className="field-hint">
+              <strong>Previsão do modelo:</strong> confiança estimada pelo YOLO de que a caixa principal contém um cacho de uva. A variedade é a cadastrada no talhão (o modelo
+              não identifica variedades) e as anomalias vêm da análise de cor feita dentro de cada cacho detectado.
             </p>
           )}
         </div>

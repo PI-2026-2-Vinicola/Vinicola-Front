@@ -1,5 +1,6 @@
 import { ScanSearch } from 'lucide-react';
 import type { Reading } from '../../data/types';
+import { analysisKind, detectionSource } from '../../lib/analysis';
 import { summarizeDetections } from '../../lib/detections';
 import { formatPct } from '../../lib/format';
 import { ReadingImage } from '../reading/ReadingImage';
@@ -27,6 +28,7 @@ export function AnalysisComparison({ reading }: { reading: Reading }) {
 /** Quantidade e confiança por classe detectada, ou a orientação quando nada foi identificado. */
 export function DetectionSummary({ reading, anomalyMinConfidence = 0.5 }: { reading: Reading; anomalyMinConfidence?: number }) {
   const summary = summarizeDetections(reading.detections);
+  const kind = analysisKind(reading.modelVersion);
   if (summary.length === 0)
     return (
       <div className="notice notice-warn detection-empty">
@@ -44,6 +46,7 @@ export function DetectionSummary({ reading, anomalyMinConfidence = 0.5 }: { read
           <tr>
             <th>Classe identificada</th>
             <th>Tipo</th>
+            <th>Origem</th>
             <th className="num">Quantidade</th>
             <th className="num">Confiança máx.</th>
             <th className="num">Confiança média</th>
@@ -56,6 +59,7 @@ export function DetectionSummary({ reading, anomalyMinConfidence = 0.5 }: { read
                 <span className={`det-swatch ${s.kind === 'cacho' ? 'cluster' : s.severe ? 'severe' : 'mild'}`} /> {s.name}
               </td>
               <td>{s.kind === 'cacho' ? KIND_LABEL.cacho : s.severe ? KIND_LABEL.grave : KIND_LABEL.leve}</td>
+              <td>{detectionSource(kind, s.kind)}</td>
               <td className="num">{s.count}</td>
               <td className="num">{formatPct(s.maxConfidence)}</td>
               <td className="num">{formatPct(s.avgConfidence)}</td>
@@ -63,7 +67,10 @@ export function DetectionSummary({ reading, anomalyMinConfidence = 0.5 }: { read
           ))}
         </tbody>
       </table>
-      <p className="muted small detection-foot">Anomalias com confiança abaixo de {formatPct(anomalyMinConfidence)} não alteram a classificação.</p>
+      <p className="muted small detection-foot">
+        Anomalias com confiança abaixo de {formatPct(anomalyMinConfidence)} não alteram a classificação.
+        {kind === 'cluster' && ' Para as anomalias da análise de cor, o valor é um índice da regra (fração da área do cacho), não uma probabilidade.'}
+      </p>
     </div>
   );
 }

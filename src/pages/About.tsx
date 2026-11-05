@@ -26,7 +26,7 @@ const TECH: [string, string[]][] = [
   ['Frontend', ['React 19 e TypeScript 7', 'Vite 8', 'React Router 7', 'TanStack Query 5 (cache e atualização automática)', 'Chart.js 4 (react-chartjs-2)', 'Leaflet 1.9 (react-leaflet)', 'lucide-react, Inter e Fraunces', 'Vitest']],
   ['Backend', ['Python 3.11+', 'FastAPI e Uvicorn', 'SQLAlchemy 2', 'Pydantic 2 e pydantic-settings', 'PyJWT', 'Pillow e NumPy (imagens)', 'httpx (serviços externos)', 'openpyxl (planilhas)', 'pytest']],
   ['Banco de dados', ['SQLite (padrão de desenvolvimento)', 'PostgreSQL 16', 'MySQL / MariaDB', 'Scripts e visões analíticas no Vinicola-bd']],
-  ['Inteligência artificial', ['Ultralytics YOLO (opcional, requirements-ml.txt)', 'Pipeline de treino e inferência em ml/', 'Análise de cor em HSV (NumPy)']],
+  ['Inteligência artificial', ['YOLO26n (Ultralytics 8.4) treinado com o Embrapa WGISD', 'ONNX Runtime na API (inferência sem PyTorch)', 'Pipeline de coleta, preparo, treino e avaliação em ml/', 'Análise de cor em HSV (NumPy)']],
   ['IoT', ['Firmware Arduino para ESP32-CAM (HTTP multipart ou MQTT)', 'Gateway de edge em FastAPI com fila offline', 'ThingSpeak (canais e API REST)']],
   ['Serviços e infraestrutura', ['Embrapa AgroAPI: RespondeAgro v1 e Agritec v2', 'Docker e Docker Compose (API, PostgreSQL e edge)']],
 ];
@@ -221,14 +221,23 @@ export default function About() {
                   metadados EXIF, inclusive GPS.
                 </li>
                 <li>O detector roda fora do laço de eventos da API, com tempo limite de 30 s (<code>OASIS_ANALYSIS_TIMEOUT_SECONDS</code>).</li>
+                <li>O modelo YOLO (ONNX Runtime, entrada 640 × 640) localiza os cachos; a análise de cor examina cada cacho detectado.</li>
                 <li>Regras de classificação transformam as detecções em qualidade, condição visual, maturação e observações.</li>
                 <li>A imagem (até 1600 px) e a miniatura são gravadas; a resposta traz as caixas normalizadas (x, y, largura, altura entre 0 e 1), exibidas sobre a foto.</li>
               </ol>
               <p>
-                <strong>Detectores.</strong> Sem modelo treinado, a API usa a <strong>análise de cor (HSV)</strong>, que localiza a região do cacho e mede manchas acastanhadas,
-                mofo acinzentado e bagas fora de cor; a variedade é a cadastrada no talhão do sensor e o índice exibido não é uma probabilidade. Quando o arquivo{' '}
-                <code>models/oasis-grapes.pt</code> existir, o <strong>YOLO (Ultralytics)</strong> passa a ser usado automaticamente, com estas classes previstas em{' '}
-                <code>ml/dataset.yaml</code>:
+                <strong>Modelo em uso.</strong> O detector publicado em <code>models/oasis-cachos.onnx</code> é um <strong>YOLO26n</strong> treinado com as 300 fotografias reais
+                do <strong>Embrapa WGISD</strong> (Embrapa Informática Agropecuária; 4.430 cachos anotados manualmente, cinco variedades, licença CC BY-NC 4.0). Ele{' '}
+                <strong>localiza os cachos</strong>; a variedade registrada é a do talhão do sensor e as anomalias (manchas, mofo, bagas fora de cor) e a maturação vêm da{' '}
+                <strong>análise de cor</strong> feita dentro de cada cacho detectado. As métricas medidas no conjunto de teste do WGISD aparecem na ficha do modelo, na página de envio
+                de fotos.
+              </p>
+              <p>
+                <strong>O que os dados permitem — e o que não permitem.</strong> As APIs da Embrapa usadas pela plataforma (RespondeAgro e Agritec) fornecem texto e dados
+                agronômicos, não imagens. O WGISD tem caixas e máscaras de cachos, mas nenhum rótulo de doença, dano ou qualidade, e só duas das seis variedades do catálogo
+                (Cabernet Sauvignon e Syrah). Por isso o modelo não classifica qualidade nem variedade: para isso é preciso um dataset próprio, anotado e validado por um
+                responsável técnico (<code>python -m app.cli export-dataset</code> → Label Studio ou CVAT → <code>ml/import_annotations.py</code>). As classes previstas para esse
+                modelo completo estão em <code>ml/dataset.yaml</code>:
               </p>
               <div className="table-wrap">
                 <table className="table">
@@ -251,13 +260,9 @@ export default function About() {
                 </table>
               </div>
               <p>
-                Modelos sem nenhuma classe da OASIS — como os modelos genéricos treinados no COCO — são recusados, e classes fora do catálogo são descartadas, para que a saída de
-                um modelo genérico nunca seja apresentada como variedade ou anomalia. Anomalias com confiança abaixo de 0,5 não alteram a classificação.
-              </p>
-              <p>
-                <strong>Situação atual:</strong> nenhum peso treinado foi publicado. A integração foi verificada com a biblioteca Ultralytics 8.4 usando um modelo genérico
-                apenas para conferir o código (o modelo foi recusado e nenhuma detecção foi aceita, como esperado). O treino depende de imagens do vinhedo anotadas e validadas por
-                um responsável técnico (<code>ml/README.md</code>). O resultado é uma análise computacional, não um diagnóstico fitossanitário.
+                Modelos sem nenhuma classe da OASIS — como os modelos genéricos treinados no COCO — são recusados, e um modelo só é carregado se o arquivo conferir com a sua
+                ficha (SHA-256). Sem o modelo, a API usa somente a análise de cor, que, avaliada com as fotos reais do WGISD, não localiza os cachos com precisão. O resultado é
+                uma previsão computacional, não um diagnóstico fitossanitário.
               </p>
             </DocSection>
 

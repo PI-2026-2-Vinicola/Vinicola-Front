@@ -203,7 +203,12 @@ function SystemTab() {
             <dd>{s.detector === 'yolo' ? 'Modelo YOLO treinado' : 'Análise de cor (HSV)'}</dd>
           </dl>
           <p className="muted small">{s.detectorDescription}</p>
-          {!s.modelLoaded && <p className="small">Para usar o YOLO, coloque os pesos treinados em <code>models/oasis-grapes.pt</code> e reinicie a API.</p>}
+          {!s.modelLoaded && (
+            <p className="small">
+              Para usar o YOLO, publique o par <code>models/oasis-cachos.onnx</code> + <code>.json</code> (gerado por <code>ml/export_model.py</code>), instale o{' '}
+              <code>onnxruntime</code> e reinicie a API.
+            </p>
+          )}
         </section>
         <section className="card card-pad info-card">
           <Database aria-hidden="true" />

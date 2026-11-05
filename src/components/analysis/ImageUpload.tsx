@@ -229,6 +229,7 @@ export function ImageUpload() {
               <span className="field-hint">
                 Variedade do talhão: {VARIETY_BY_ID[sensor.varietyId]?.name ?? sensor.varietyId}.
                 {model.data && !model.data.yoloLoaded && ' A análise de cor usa essa informação como variedade.'}
+                {model.data?.card?.task === 'deteccao_cachos' && ' O modelo localiza os cachos; a variedade registrada é a do talhão.'}
               </span>
             )}
           </div>

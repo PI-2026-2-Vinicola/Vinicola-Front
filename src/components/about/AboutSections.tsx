@@ -22,12 +22,17 @@ export function FeatureStatus({ status }: { status: IntegrationsStatus | undefin
     configured === undefined ? ['pending', 'Consultando…'] : configured ? ['ok', ok] : ['pending', pending];
   const rows: { name: string; level: Level; label?: string; note: string }[] = [
     { name: 'Plataforma: autenticação, perfis, sensores, leituras, histórico, importação e auditoria', level: 'ok', note: 'Coberta por testes automatizados (pytest e Vitest).' },
-    { name: 'Análise de imagem por cor (HSV)', level: 'ok', note: 'Detector ativo enquanto não houver modelo YOLO treinado.' },
     {
-      name: 'Detecção com YOLO',
+      name: 'Detecção de cachos com YOLO',
       level: status?.yoloLoaded ? 'ok' : 'partial',
-      label: status?.yoloLoaded ? 'Ativo' : 'Aguardando pesos treinados',
-      note: 'Integração pronta e validada com a biblioteca Ultralytics; falta o modelo treinado com imagens anotadas do vinhedo.',
+      label: status?.yoloLoaded ? 'Ativo' : 'Modelo não carregado',
+      note: 'Modelo YOLO26n treinado com 300 fotos reais do Embrapa WGISD (ONNX Runtime na API). Localiza os cachos; não identifica variedade nem doenças.',
+    },
+    {
+      name: 'Qualidade e anomalias por análise de cor',
+      level: 'partial',
+      label: 'Regra calibrada',
+      note: 'Regra aplicada dentro de cada cacho detectado, calibrada com cachos reais do WGISD para disparar raramente; sem fotos anotadas de defeitos, a sensibilidade ainda não foi medida.',
     },
     (() => {
       const [level, label] = live(status?.thingspeak.configured, 'Configurado', 'Aguardando canal');
@@ -114,7 +119,7 @@ export function ArchitectureMap({ status }: { status: IntegrationsStatus | undef
           Disco local: imagem processada (até 1600 px) e miniatura, sem metadados.
         </Node>
         <Node icon={<BrainCircuit aria-hidden="true" />} title="Detector" status={chip(status?.yoloLoaded, 'YOLO ativo', 'Análise de cor ativa')}>
-          Análise de cor (HSV) ou modelo YOLO, quando houver pesos treinados.
+          Modelo YOLO de cachos (ONNX) com análise de cor dentro de cada cacho; sem o modelo, somente análise de cor.
         </Node>
         <Node
           icon={<Cloud aria-hidden="true" />}
