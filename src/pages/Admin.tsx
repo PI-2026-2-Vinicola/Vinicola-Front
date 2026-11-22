@@ -218,7 +218,9 @@ function SystemTab() {
             <dd>{s.database}</dd>
             <dt>Imagens armazenadas</dt>
             <dd>
-              <HardDrive size={14} style={{ display: 'inline', verticalAlign: '-2px' }} /> {s.storageMb.toLocaleString('pt-BR')} MB
+              <HardDrive size={14} style={{ display: 'inline', verticalAlign: '-2px' }} />{' '}
+              {s.storageMb == null ? 'armazenamento indisponível no momento' : `${s.storageMb.toLocaleString('pt-BR')} MB`}
+              {s.storageBackend === 's3' && <small className="muted"> · bucket de objetos (S3)</small>}
             </dd>
             {Object.entries(s.counts).map(([k, v]) => (
               <Fragment2 key={k} label={COUNT_LABEL[k] ?? k} value={formatNumber(v)} />
