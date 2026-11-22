@@ -31,6 +31,19 @@ VITE_API_URL=https://api.suaempresa.com.br npm run build
 
 `VITE_API_URL` vazio = API na mesma origem do site (ex.: proxy reverso servindo `/api`). `VITE_BASE` define o subdiretório de publicação. `vercel.json` e `public/_redirects` já redirecionam as rotas para o `index.html`. Inclua a origem do site em `CORS_ORIGINS` na API.
 
+## Nuvem
+
+O frontend é publicado na **Vercel** (PaaS: build e CDN global com HTTPS gerenciado). A arquitetura completa (API no Render, banco e fotos no Supabase), os custos e o passo a passo de deploy do zero estão no repositório da API: [`Vinicola-back/docs/nuvem.md`](https://github.com/PI-2026-2-Vinicola/Vinicola-back/blob/main/docs/nuvem.md).
+
+| Item | Onde |
+| --- | --- |
+| URL publicada | variável `OASIS_SITE_URL` do ambiente `producao` (ver README da API) |
+| Pipeline | [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml): `npm ci` → testes (Vitest) → build (TypeScript + Vite) → varredura de segredos; na `main`, deploy na Vercel e conferência do site. Execuções na aba **Actions** |
+| Infraestrutura em código | [`vercel.json`](vercel.json): framework, comandos, rotas da SPA, cabeçalhos de segurança e deploy pelo Git desligado (quem publica é o pipeline) |
+| Variáveis | `VITE_API_URL` (endereço HTTPS da API) no ambiente **Production** da Vercel; em desenvolvimento fica vazia e o Vite encaminha `/api` para `localhost:8000` |
+| Segredos do GitHub (ambiente `producao`) | `VERCEL_TOKEN` (token com escopo só do time do projeto e prazo de validade), `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`; variável `OASIS_SITE_URL` |
+| Logs | Vercel → projeto → **Deployments** (build) e **Logs** (acessos) |
+
 ## Páginas
 
 | Rota | Perfis | Conteúdo |
