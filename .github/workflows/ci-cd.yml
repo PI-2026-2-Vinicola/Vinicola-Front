@@ -1,0 +1,120 @@
+# Pipeline do frontend da OASIS.
+#
+# A cada push e pull request: instala as dependências (npm ci), roda os testes (Vitest), faz o build de
+# produção (TypeScript + Vite) e procura segredos em todo o histórico do repositório.
+# Na branch main, se tudo passar, publica na Vercel (build no runner, deploy do resultado) e confere o site.
+# O deploy automático pelo Git da Vercel fica desligado em vercel.json: quem publica é este pipeline.
+name: CI/CD
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build-e-testes:
+    name: Instalação, testes e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instala as dependências
+        run: npm ci
+
+      - name: Roda os testes automatizados
+        run: npm test
+
+      - name: Build de produção
+        run: npm run build
+
+      - name: Guarda o build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  segredos:
+    name: Varredura de segredos
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # todo o histórico, não só o último commit
+
+      - name: Procura credenciais em todos os commits (gitleaks)
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 \
+            git /repo --redact --no-banner --verbose
+
+  deploy:
+    name: Deploy na Vercel
+    needs: [build-e-testes, segredos]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Token e IDs da Vercel ficam no ambiente "producao", liberado só para a branch main.
+    environment:
+      name: producao
+      url: ${{ vars.OASIS_SITE_URL }}
+    concurrency:
+      group: deploy-producao
+      cancel-in-progress: false
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Confere os segredos
+        run: |
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!name}" ]; then echo "::error::Defina o secret $name no ambiente producao (README, seção Nuvem)."; exit 1; fi
+          done
+
+      - name: Instala a CLI da Vercel
+        run: npm install --global vercel@latest
+
+      - name: Baixa a configuração de produção (inclui VITE_API_URL)
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build de produção
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Publica
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "Publicado em $url"
+          echo "DEPLOY_URL=$url" >> "$GITHUB_ENV"
+
+      - name: Confere o site no ar
+        env:
+          OASIS_SITE_URL: ${{ vars.OASIS_SITE_URL }}
+        run: |
+          site="${OASIS_SITE_URL:-$DEPLOY_URL}"
+          for i in $(seq 1 10); do
+            if curl -fsS -o /dev/null "$site" && curl -fsS -o /dev/null "$site/sensores"; then echo "Site respondendo: $site"; exit 0; fi
+            sleep 6
+          done
+          echo "::error::O site $site não respondeu depois do deploy."
+          exit 1
