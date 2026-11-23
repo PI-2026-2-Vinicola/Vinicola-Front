@@ -69,7 +69,7 @@ export default function Login() {
           <p>Sensores, imagens analisadas e indicadores de qualidade das uvas em um só lugar.</p>
           <ul className="login-perks">
             <li>
-              <ShieldCheck /> Perfis de acesso: Administrador, Gestor e Operador
+              <ShieldCheck /> Perfis: Administrador, Exportadora, Operador e Cliente internacional, cada um só com os dados da própria organização
             </li>
             <li>
               <KeyRound /> Sessão com expiração e bloqueio após tentativas inválidas
