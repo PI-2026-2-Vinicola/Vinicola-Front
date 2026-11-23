@@ -44,6 +44,14 @@ O frontend é publicado na **Vercel** (PaaS: build e CDN global com HTTPS gerenc
 | Segredos do GitHub (ambiente `producao`) | `VERCEL_TOKEN` (token com escopo só do time do projeto e prazo de validade), `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`; variável `OASIS_SITE_URL` |
 | Logs | Vercel → projeto → **Deployments** (build) e **Logs** (acessos) |
 
+## Segurança
+
+- **Autorização no servidor.** A interface lê as permissões do usuário em `/auth/me` (`canAccess` em `src/services/api.ts`) só para mostrar ou esconder menus; a API recusa com 403 qualquer operação fora da matriz, mesmo chamada direto.
+- **Sessão.** O token JWT vai no cabeçalho `Authorization`; uma resposta 401 (token expirado, inválido ou usuário desativado) leva de volta ao login, e **Sair** apaga o token.
+- **Dados sensíveis.** Na tela de clientes internacionais, contato, e-mail, telefone, identificação fiscal e condições comerciais chegam mascarados na lista; o valor completo só é pedido em **Ver dados**, que a API decifra e registra na auditoria.
+- **Cabeçalhos** (`vercel.json`): Content-Security-Policy (scripts só do próprio site, sem `eval` nem script inline; a página não pode ser embutida em outro site), `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` e `Permissions-Policy`. HTTPS é obrigatório na Vercel.
+- Controles completos (matriz RBAC, criptografia, segredos e testes): [`Vinicola-back/docs/seguranca.md`](https://github.com/PI-2026-2-Vinicola/Vinicola-back/blob/main/docs/seguranca.md).
+
 ## Páginas
 
 | Rota | Perfis | Conteúdo |
@@ -54,17 +62,18 @@ O frontend é publicado na **Vercel** (PaaS: build e CDN global com HTTPS gerenc
 | `/sobre` | público | Documentação técnica fiel à implementação: situação de cada funcionalidade (com o estado das integrações consultado na API), arquitetura, ThingSpeak, Embrapa, YOLO, tecnologias, fluxo de dados, segurança e referências |
 | `/monitoramento` | todos | Canal do ThingSpeak: campos com os nomes do canal, último valor e horário, mín./máx., gráficos (últimos registros, 24 h, 7 ou 30 dias), atualização automática, avisos de canal sem dados ou resposta desatualizada |
 | `/login` | público | Login com mensagens de erro e bloqueio por tentativas; orientação de redefinição de senha pelo administrador |
-| `/dashboard` | admin, gestor | Indicadores do período com comparação ao período anterior, ambiente (temperatura/umidade), gráficos por dia/hora, evolução, sensores, variedades, mapa, alertas e últimas leituras |
-| `/sensores` | admin, gestor | Mapa com coordenadas reais, status calculado, filtros por status/bloco/busca, tabela e cartões; cadastro de sensor (admin) com exibição única do token |
-| `/sensores/:id` | admin, gestor | Indicadores, leituras por dia, condições ambientais, bateria e sinal, leituras paginadas; editar, gerar token, desativar, registrar medição |
-| `/analises` | todos | **Enviar imagem** (escolha → validação de formato, tamanho, HEIC e arquivo corrompido → prévia → análise na API → imagem enviada × imagem com caixas, detecções por classe com quantidade e confiança, orientação quando nada é detectado; ficha do modelo em uso — dados de treino do Embrapa WGISD, métricas de teste, o que cada parte decide e limitações — informada pela API) e **Painel analítico** filtrável |
+| `/dashboard` | todos | Indicadores do período com comparação ao período anterior, ambiente (temperatura/umidade), gráficos por dia/hora, evolução, sensores, variedades, mapa, alertas e últimas leituras |
+| `/sensores` | admin, gestor, operador | Mapa com coordenadas reais, status calculado, filtros por status/bloco/busca, tabela e cartões; cadastro de sensor (admin e gestor) com exibição única do token |
+| `/sensores/:id` | admin, gestor, operador | Indicadores, leituras por dia, condições ambientais, bateria e sinal, leituras paginadas; editar, gerar token, desativar, registrar medição |
+| `/analises` | admin, gestor, operador | **Enviar imagem** (escolha → validação de formato, tamanho, HEIC e arquivo corrompido → prévia → análise na API → imagem enviada × imagem com caixas, detecções por classe com quantidade e confiança, orientação quando nada é detectado; ficha do modelo em uso — dados de treino do Embrapa WGISD, métricas de teste, o que cada parte decide e limitações — informada pela API) e **Painel analítico** filtrável |
 | `/classificacao` | todos | Resultado por variedade (quantidade, % por classificação, confiança), filtro por tipo e período, evolução e maturação |
-| `/historico`, `/historico/:id` | todos | Histórico paginado no servidor com filtros combináveis (período, sensor, bloco, variedade, qualidade, classificação, maturação, origem, busca), ordenação, exportação CSV, detalhe e exclusão (admin) |
+| `/historico`, `/historico/:id` | todos | Histórico paginado no servidor com filtros combináveis (período, sensor, bloco, variedade, qualidade, classificação, maturação, origem, busca), ordenação, exportação CSV, detalhe e exclusão (admin e gestor) |
 | `/importacao` | admin, gestor | Importação de leituras, sensores e medições (CSV, Excel, JSON) com pré-visualização validada pelo servidor, tratamento de duplicados e histórico de importações |
-| `/administracao` | admin | Usuários e perfis, estado do sistema, auditoria e integração de dispositivos |
+| `/clientes` | admin, gestor, cliente | Clientes internacionais: lista com os dados sensíveis mascarados, **Ver dados** decifrado pela API (consulta auditada), cadastro e edição (admin e gestor); o cliente internacional vê só o próprio cadastro |
+| `/administracao` | admin | Usuários e perfis, organizações (exportadoras), matriz de permissões, estado do sistema, auditoria e integração de dispositivos |
 | `/conta` | todos | Dados do usuário e troca de senha |
 
-As permissões da interface espelham as regras da API, que é quem de fato autoriza cada operação.
+Perfis: administrador, gestor (exportadora), operador (campo e logística) e cliente internacional. Cada um vê só os dados da própria exportadora. As permissões vêm da API (`/auth/me`), que aplica a mesma matriz em todas as rotas; esconder um menu aqui é conveniência, o bloqueio real é no servidor.
 
 ## Estrutura
 

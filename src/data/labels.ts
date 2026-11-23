@@ -51,14 +51,16 @@ export const STAGE_LABEL: Record<PipelineStage, string> = {
 
 export const ROLE_LABEL: Record<Role, string> = {
   admin: 'Administrador',
-  gestor: 'Gestor',
-  operador: 'Operador',
+  gestor: 'Exportadora (gestor)',
+  operador: 'Operador de campo e logística',
+  cliente: 'Cliente internacional',
 };
 
 export const ROLE_DESCRIPTION: Record<Role, string> = {
-  admin: 'Acesso total: usuários, sensores, importação e configurações',
-  gestor: 'Painel, sensores, análises, histórico e importação de dados',
-  operador: 'Envio de imagens, análises, classificação e histórico',
+  admin: 'Plataforma inteira: usuários, organizações, todos os dados, auditoria e configurações',
+  gestor: 'Dados da própria exportadora: sensores, análises, clima, importação e clientes internacionais',
+  operador: 'Dados da própria exportadora: envio de imagens, análises, histórico e clima',
+  cliente: 'Consulta da qualidade e do clima da exportadora contratada e do próprio cadastro',
 };
 
 export const SOURCE_LABEL: Record<ReadingSource, string> = {
@@ -95,6 +97,15 @@ export const AUDIT_ACTION_LABEL: Record<string, string> = {
   importacao: 'Importação',
   importacao_falhou: 'Importação recusada',
   leitura_excluida: 'Leitura excluída',
+  acesso_negado: 'Acesso negado',
+  dados_sensiveis_consultados: 'Dados sensíveis consultados',
+  cliente_criado: 'Cliente internacional cadastrado',
+  cliente_alterado: 'Cliente internacional alterado',
+  cliente_excluido: 'Cliente internacional excluído',
+  organizacao_criada: 'Organização cadastrada',
+  organizacao_alterada: 'Organização alterada',
+  organizacao_excluida: 'Organização excluída',
+  sensor_excluido: 'Sensor excluído',
 };
 
 export const ANOMALY_LABEL: Record<string, string> = {

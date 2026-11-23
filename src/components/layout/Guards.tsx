@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ROLE_LABEL } from '../../data/labels';
-import { ACCESS, homeFor, type Area } from '../../services/api';
+import { homeFor, type Area } from '../../services/api';
 import { LoadingBlock } from '../ui/States';
 import { PageHeader, PageShell } from './PageHeader';
 
@@ -33,8 +33,11 @@ export function RequireAccess({ area, children }: { area: Area; children: ReactN
           <div className="kpi-icon">
             <Lock />
           </div>
-          <h2>Área não disponível para o perfil {ROLE_LABEL[user.role]}</h2>
-          <p>Disponível para: {(ACCESS[area] as readonly string[]).map((r) => ROLE_LABEL[r as keyof typeof ROLE_LABEL]).join(', ')}. Solicite acesso a um administrador.</p>
+          <h2>Acesso negado para o perfil {ROLE_LABEL[user.role]}</h2>
+          <p>
+            Seu perfil não tem permissão para esta área. A API aplica a mesma regra: mesmo acessando o endereço direto, os dados não são
+            entregues. Solicite acesso a um administrador.
+          </p>
           <Link to={homeFor(user.role)} className="btn btn-primary">
             Ir para a página inicial do seu perfil
           </Link>

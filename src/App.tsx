@@ -17,6 +17,7 @@ const Classification = lazy(() => import('./pages/Classification'));
 const History = lazy(() => import('./pages/History'));
 const ReadingPage = lazy(() => import('./pages/ReadingPage'));
 const Import = lazy(() => import('./pages/Import'));
+const Clients = lazy(() => import('./pages/Clients'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Account = lazy(() => import('./pages/Account'));
 const Grapes = lazy(() => import('./pages/Grapes'));
@@ -101,6 +102,7 @@ export default function App() {
           <Route path="/historico" element={<RequireAccess area="historico"><History /></RequireAccess>} />
           <Route path="/historico/:id" element={<RequireAccess area="historico"><ReadingPage /></RequireAccess>} />
           <Route path="/importacao" element={<RequireAccess area="importacao"><Import /></RequireAccess>} />
+          <Route path="/clientes" element={<RequireAccess area="clientes"><Clients /></RequireAccess>} />
           <Route path="/administracao" element={<RequireAccess area="administracao"><Admin /></RequireAccess>} />
           <Route path="/conta" element={<Account />} />
         </Route>

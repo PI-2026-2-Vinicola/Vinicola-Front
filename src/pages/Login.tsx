@@ -5,8 +5,8 @@ import { VineyardRows } from '../components/landing/VineyardRows';
 import { Brand } from '../components/ui/Logo';
 import { errorMessage } from '../components/ui/States';
 import { useAuth } from '../context/AuthContext';
-import type { Role } from '../data/types';
-import { ACCESS, homeFor, type Area } from '../services/api';
+import type { User } from '../data/types';
+import { canAccess, homeFor, type Area } from '../services/api';
 import { ApiError } from '../services/http';
 
 const AREA_BY_PATH: Record<string, Area> = {
@@ -17,13 +17,15 @@ const AREA_BY_PATH: Record<string, Area> = {
   historico: 'historico',
   importacao: 'importacao',
   administracao: 'administracao',
+  clientes: 'clientes',
+  monitoramento: 'monitoramento',
 };
 
 /** Volta para a página que pediu login, se o perfil tiver acesso a ela. */
-function destination(role: Role, from?: string) {
-  if (!from || from.startsWith('/login')) return homeFor(role);
+function destination(user: User, from?: string) {
+  if (!from || from.startsWith('/login')) return homeFor(user.role);
   const area = AREA_BY_PATH[from.split('/')[1]?.split('?')[0] ?? ''];
-  if (area && !(ACCESS[area] as readonly string[]).includes(role)) return homeFor(role);
+  if (area && !canAccess(user, area)) return homeFor(user.role);
   return from;
 }
 
@@ -39,7 +41,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (status === 'authenticated' && user) return <Navigate to={destination(user.role, from)} replace />;
+  if (status === 'authenticated' && user) return <Navigate to={destination(user, from)} replace />;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -49,7 +51,7 @@ export default function Login() {
     setBusy(true);
     try {
       const u = await login(email, password);
-      navigate(destination(u.role, from), { replace: true });
+      navigate(destination(u, from), { replace: true });
     } catch (err) {
       setError(err instanceof ApiError && err.status === 401 ? 'E-mail ou senha inválidos.' : errorMessage(err));
     } finally {
@@ -67,7 +69,7 @@ export default function Login() {
           <p>Sensores, imagens analisadas e indicadores de qualidade das uvas em um só lugar.</p>
           <ul className="login-perks">
             <li>
-              <ShieldCheck /> Perfis de acesso: Administrador, Gestor e Operador
+              <ShieldCheck /> Perfis: Administrador, Exportadora, Operador e Cliente internacional, cada um só com os dados da própria organização
             </li>
             <li>
               <KeyRound /> Sessão com expiração e bloqueio após tentativas inválidas

@@ -135,9 +135,9 @@ export default function About() {
             <DocSection id="arquitetura" letter="B" title="Arquitetura da aplicação">
               <ArchitectureMap status={s} />
               <p>
-                A API concentra as regras de negócio e a autorização: perfis <code>admin</code>, <code>gestor</code> e <code>operador</code> são verificados no servidor em
-                cada rota. O contrato JSON usa camelCase e é o mesmo tipado no frontend (<code>src/data/types.ts</code>). As leituras, sensores, medições ambientais,
-                importações e a auditoria ficam no banco relacional; as imagens, em disco.
+                A API concentra as regras de negócio e a autorização: os perfis <code>admin</code>, <code>gestor</code>, <code>operador</code> e <code>cliente</code> são
+                verificados no servidor em cada rota, por uma matriz de permissões única, e cada exportadora só acessa os próprios dados. O contrato JSON usa camelCase e é o mesmo tipado no frontend (<code>src/data/types.ts</code>). As leituras, sensores, medições ambientais,
+                importações, os clientes internacionais e a auditoria ficam no banco relacional; as imagens, em disco ou num bucket S3 privado.
               </p>
             </DocSection>
 
@@ -309,8 +309,12 @@ export default function About() {
                   enviadas ao navegador. Os registros de URL da biblioteca HTTP são silenciados para que a Read API Key do ThingSpeak não apareça nos logs.
                 </li>
                 <li>
-                  <strong>Acesso:</strong> JWT com expiração, perfis verificados no servidor, bloqueio após tentativas de login e token individual por dispositivo (guardado como
-                  hash).
+                  <strong>Acesso:</strong> JWT com expiração, matriz de permissões por perfil verificada no servidor, isolamento entre exportadoras, acessos negados
+                  registrados na auditoria, bloqueio após tentativas de login e token individual por dispositivo (guardado como hash).
+                </li>
+                <li>
+                  <strong>Dados protegidos:</strong> senhas com hash PBKDF2-SHA256 e sal; dados pessoais e comerciais dos clientes internacionais cifrados no banco com
+                  AES-256-GCM, decifrados só pela API para os perfis autorizados.
                 </li>
                 <li>
                   <strong>Entradas:</strong> validação dos dados recebidos, limite de tamanho e decodificação real das imagens, remoção de metadados, consultas parametrizadas e

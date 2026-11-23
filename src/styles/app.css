@@ -1350,6 +1350,58 @@ tr.is-muted td {
   border-color: #f2dc9b;
 }
 
+.notice-info {
+  background: var(--good-bg);
+  border-color: #c4e6d2;
+}
+
+/* valores sensíveis mascarados (o original fica cifrado no banco) */
+.protected-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-700);
+}
+
+.protected-value svg {
+  color: var(--wine-500);
+  flex: none;
+}
+
+/* matriz de permissões (Administração → Perfis e permissões) */
+.rbac-matrix td,
+.rbac-matrix th {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.rbac-matrix td:first-child,
+.rbac-matrix th:first-child {
+  text-align: left;
+}
+
+.rbac-ops {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--wine-700);
+}
+
+.rbac-scope {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-500);
+}
+
+.org-chip {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--wine-600);
+}
+
 pre.code {
   margin: 0;
   padding: 14px 16px;
