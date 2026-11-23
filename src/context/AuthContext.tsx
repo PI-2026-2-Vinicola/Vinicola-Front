@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '../data/types';
 import { queryClient } from '../lib/queryClient';
-import { ACCESS, login as apiLogin, me, type Area } from '../services/api';
+import { canAccess, login as apiLogin, me, type Area } from '../services/api';
 import { clearImageCache, getToken, setToken, UNAUTHORIZED_EVENT } from '../services/http';
 
 type AuthStatus = 'checking' | 'authenticated' | 'anonymous';
@@ -64,7 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return u;
   }, []);
 
-  const can = useCallback((area: Area) => !!user && (ACCESS[area] as readonly string[]).includes(user.role), [user]);
+  // Permissões da matriz RBAC enviadas pela API; a API aplica as mesmas regras em todas as rotas.
+  const can = useCallback((area: Area) => canAccess(user, area), [user]);
 
   const value = useMemo(() => ({ user, status, notice, login, logout, refresh, can }), [user, status, notice, login, logout, refresh, can]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
