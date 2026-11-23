@@ -257,7 +257,10 @@ export interface SystemStatus {
   timezone: string;
   farmName: string | null;
   publicRead: boolean;
-  storageMb: number;
+  /** "local" (disco do servidor) ou "s3" (bucket de armazenamento de objetos). */
+  storageBackend?: string;
+  /** null quando o armazenamento não respondeu. */
+  storageMb: number | null;
   counts: Record<string, number>;
 }
 
