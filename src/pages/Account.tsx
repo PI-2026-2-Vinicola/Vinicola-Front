@@ -50,6 +50,8 @@ export default function Account() {
             <dd>
               {ROLE_LABEL[user.role]} — {ROLE_DESCRIPTION[user.role]}
             </dd>
+            <dt>Organização</dt>
+            <dd>{user.organizationName ?? 'Plataforma (todas as organizações)'}</dd>
             <dt>Último acesso</dt>
             <dd>{user.lastLoginAt ? formatDateTime(user.lastLoginAt) : '—'}</dd>
           </dl>

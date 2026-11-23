@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Database, HardDrive, KeyRound, Pencil, Plus, Radio, ScanSearch, ScrollText, Server, Settings2, Users } from 'lucide-react';
+import { Building2, ChevronLeft, ChevronRight, Database, HardDrive, KeyRound, Pencil, Plus, Radio, ScanSearch, ScrollText, Server, Settings2, ShieldCheck, Users } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../components/layout/PageHeader';
@@ -9,12 +9,12 @@ import { useToast } from '../components/ui/Toast';
 import { useAuth } from '../context/AuthContext';
 import { AUDIT_ACTION_LABEL, ROLE_DESCRIPTION, ROLE_LABEL } from '../data/labels';
 import type { Role, User } from '../data/types';
-import { useAudit, useSystemStatus, useUsers } from '../hooks/queries';
+import { useAudit, useClients, useOrganizations, usePermissionMatrix, useSystemStatus, useUsers } from '../hooks/queries';
 import { formatDateTime, formatNumber, formatRelative } from '../lib/format';
-import { createUser, updateUser } from '../services/api';
+import { createOrganization, createUser, updateUser } from '../services/api';
 import { API_BASE } from '../services/http';
 
-const ROLES: Role[] = ['admin', 'gestor', 'operador'];
+const ROLES: Role[] = ['admin', 'gestor', 'operador', 'cliente'];
 const PASSWORD_RULE = 'Mínimo de 8 caracteres, com letras e números.';
 const validPassword = (p: string) => p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p);
 
@@ -27,14 +27,22 @@ function UserForm({ user, onDone }: { user?: User; onDone: () => void }) {
   const [role, setRole] = useState<Role>(user?.role ?? 'operador');
   const [active, setActive] = useState(user?.isActive ?? true);
   const [password, setPassword] = useState('');
+  const [organizationId, setOrganizationId] = useState<number | null>(user?.organizationId ?? null);
+  const [clientId, setClientId] = useState<number | null>(user?.clientId ?? null);
   const [error, setError] = useState<string | null>(null);
   const self = user?.id === me?.id;
+  const orgs = useOrganizations();
+  const clients = useClients(role === 'cliente');
+  const orgClients = (clients.data ?? []).filter((c) => !organizationId || c.organizationId === organizationId);
   const mutation = useMutation({
     mutationFn: () => {
-      if (!user) return createUser({ name: name.trim(), email: email.trim(), role, password });
+      const membership = role === 'admin' ? { organizationId: null, clientId: null } : { organizationId, clientId: role === 'cliente' ? clientId : null };
+      if (!user) return createUser({ name: name.trim(), email: email.trim(), role, password, ...membership });
       const patch: Parameters<typeof updateUser>[1] = {};
       if (name.trim() !== user.name) patch.name = name.trim();
       if (role !== user.role) patch.role = role;
+      if (membership.organizationId !== user.organizationId) patch.organizationId = membership.organizationId;
+      if (membership.clientId !== user.clientId) patch.clientId = membership.clientId;
       if (active !== user.isActive) patch.isActive = active;
       if (password) patch.password = password;
       return updateUser(user.id, patch);
@@ -52,6 +60,7 @@ function UserForm({ user, onDone }: { user?: User; onDone: () => void }) {
     if (name.trim().length < 2) return setError('Informe o nome.');
     if (!user && !/^\S+@\S+\.\S+$/.test(email.trim())) return setError('Informe um e-mail válido.');
     if ((!user || password) && !validPassword(password)) return setError(`Senha: ${PASSWORD_RULE}`);
+    if (role === 'cliente' && !clientId) return setError('Escolha o cliente internacional do usuário de perfil cliente.');
     setError(null);
     mutation.mutate();
   };
@@ -77,6 +86,34 @@ function UserForm({ user, onDone }: { user?: User; onDone: () => void }) {
           </select>
           {self && <span className="field-hint">Você não pode alterar o próprio perfil.</span>}
         </div>
+        {role !== 'admin' && (
+          <div className="field span-2">
+            <label htmlFor="u-org">Organização (exportadora)</label>
+            <select id="u-org" className="select" value={organizationId ?? ''} onChange={(e) => (setOrganizationId(Number(e.target.value) || null), setClientId(null))}>
+              <option value="">Organização padrão</option>
+              {orgs.data?.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+            <span className="field-hint">O usuário só alcança os dados desta organização (a API confere em todas as rotas).</span>
+          </div>
+        )}
+        {role === 'cliente' && (
+          <div className="field span-2">
+            <label htmlFor="u-client">Cliente internacional</label>
+            <select id="u-client" className="select" value={clientId ?? ''} onChange={(e) => setClientId(Number(e.target.value) || null)}>
+              <option value="">Escolha o cadastro do cliente</option>
+              {orgClients.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.companyName} ({c.country})
+                </option>
+              ))}
+            </select>
+            <span className="field-hint">O perfil cliente consulta apenas este cadastro e os dados de qualidade da exportadora.</span>
+          </div>
+        )}
         <div className="field span-2">
           <label htmlFor="u-pass">{user ? 'Nova senha (opcional)' : 'Senha inicial'}</label>
           <input id="u-pass" className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
@@ -124,6 +161,7 @@ function UsersTab() {
                 <th>Nome</th>
                 <th>E-mail</th>
                 <th>Perfil</th>
+                <th>Organização</th>
                 <th>Situação</th>
                 <th>Último acesso</th>
                 <th>Criado em</th>
@@ -138,6 +176,7 @@ function UsersTab() {
                   </td>
                   <td data-label="E-mail">{u.email}</td>
                   <td data-label="Perfil">{ROLE_LABEL[u.role]}</td>
+                  <td data-label="Organização">{u.organizationName ?? <span className="muted">Plataforma</span>}</td>
                   <td data-label="Situação">
                     <span className={`badge ${u.isActive ? 'badge-boa' : 'badge-neutral'}`}>{u.isActive ? 'Ativo' : 'Desativado'}</span>
                   </td>
@@ -160,6 +199,129 @@ function UsersTab() {
           {editing && <UserForm key={editing === 'new' ? 'new' : editing.id} user={editing === 'new' ? undefined : editing} onDone={() => setEditing(null)} />}
         </div>
       </Modal>
+    </section>
+  );
+}
+
+function OrganizationsTab() {
+  const orgs = useOrganizations();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [name, setName] = useState('');
+  const [city, setCity] = useState('');
+  const create = useMutation({
+    mutationFn: () => createOrganization({ name: name.trim(), city: city.trim() || null }),
+    onSuccess: (o) => {
+      void qc.invalidateQueries({ queryKey: ['organizations'] });
+      toast.success(`${o.name} cadastrada.`);
+      setName('');
+      setCity('');
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  return (
+    <section className="card">
+      <div className="card-head card-pad" style={{ marginBottom: 0 }}>
+        <div>
+          <h3 className="card-title">Organizações (exportadoras)</h3>
+          <p className="card-sub">Cada exportadora só enxerga os próprios sensores, análises, dados climáticos, importações e clientes. O administrador vê todas.</p>
+        </div>
+      </div>
+      <form
+        className="table-toolbar"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (name.trim().length >= 2) create.mutate();
+        }}
+      >
+        <input className="input" placeholder="Nome da exportadora" value={name} onChange={(e) => setName(e.target.value)} maxLength={120} aria-label="Nome da exportadora" />
+        <input className="input" placeholder="Cidade (opcional)" value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} aria-label="Cidade" />
+        <button className="btn btn-primary btn-sm" disabled={create.isPending || name.trim().length < 2}>
+          <Plus /> Cadastrar
+        </button>
+      </form>
+      {orgs.isPending ? (
+        <LoadingBlock height={160} />
+      ) : orgs.isError ? (
+        <ErrorState error={orgs.error} />
+      ) : (
+        <div className="table-wrap">
+          <table className="table table-cards">
+            <thead>
+              <tr>
+                <th>Organização</th>
+                <th>Cidade</th>
+                <th className="num">Usuários</th>
+                <th className="num">Sensores</th>
+                <th className="num">Clientes</th>
+                <th>Criada em</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orgs.data.map((o) => (
+                <tr key={o.id}>
+                  <td data-label="Organização">
+                    <strong>{o.name}</strong>
+                  </td>
+                  <td data-label="Cidade">{o.city ?? '—'}</td>
+                  <td data-label="Usuários" className="num">{o.users}</td>
+                  <td data-label="Sensores" className="num">{o.sensors}</td>
+                  <td data-label="Clientes" className="num">{o.clients}</td>
+                  <td data-label="Criada em">{formatDateTime(o.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** Matriz lida da API: é a mesma que as rotas aplicam (não uma cópia da documentação). */
+function PermissionsTab() {
+  const matrix = usePermissionMatrix();
+  if (matrix.isPending) return <LoadingBlock />;
+  if (matrix.isError) return <ErrorState error={matrix.error} />;
+  const m = matrix.data;
+  return (
+    <section className="card">
+      <div className="card-head card-pad" style={{ marginBottom: 0 }}>
+        <div>
+          <h3 className="card-title">Perfis e permissões (RBAC)</h3>
+          <p className="card-sub">
+            Matriz aplicada pela API em todas as rotas. C = criar · R = consultar · U = atualizar · D = excluir · – = sem acesso. Toda tentativa negada aparece na
+            Auditoria como “Acesso negado”.
+          </p>
+        </div>
+      </div>
+      <div className="table-wrap">
+        <table className="table rbac-matrix">
+          <thead>
+            <tr>
+              <th>Recurso</th>
+              {m.roles.map((r) => (
+                <th key={r.id}>{r.label}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {m.resources.map((res) => (
+              <tr key={res.id}>
+                <td>
+                  <strong>{res.label}</strong>
+                </td>
+                {m.roles.map((r) => (
+                  <td key={r.id}>
+                    <span className="rbac-ops">{res.permissions[r.id] || '–'}</span>
+                    {res.permissions[r.id] && res.scope[r.id] && <span className="rbac-scope">{res.scope[r.id]}</span>}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }
@@ -378,6 +540,8 @@ function DevicesTab() {
 
 const TABS = [
   { id: 'usuarios', label: 'Usuários', icon: Users, el: <UsersTab /> },
+  { id: 'organizacoes', label: 'Organizações', icon: Building2, el: <OrganizationsTab /> },
+  { id: 'permissoes', label: 'Perfis e permissões', icon: ShieldCheck, el: <PermissionsTab /> },
   { id: 'sistema', label: 'Sistema', icon: Settings2, el: <SystemTab /> },
   { id: 'auditoria', label: 'Auditoria', icon: ScrollText, el: <AuditTab /> },
   { id: 'dispositivos', label: 'Integração de dispositivos', icon: KeyRound, el: <DevicesTab /> },
@@ -389,7 +553,7 @@ export default function Admin() {
   return (
     <div className="page">
       <PageHeader eyebrow="Sistema"
-        title="Administração" description="Usuários e perfis de acesso, estado do sistema, trilha de auditoria e integração dos dispositivos." />
+        title="Administração" description="Usuários, organizações, matriz de permissões, estado do sistema, trilha de auditoria e integração dos dispositivos." />
       <div className="tabs" role="tablist">
         {TABS.map((t) => (
           <button key={t.id} role="tab" aria-selected={tab.id === t.id} onClick={() => setParams(t.id === 'usuarios' ? {} : { aba: t.id }, { replace: true })}>
