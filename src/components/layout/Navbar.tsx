@@ -1,4 +1,4 @@
-import { Activity, BarChart3, BookOpen, Cpu, FileUp, Globe2, Grape, History, House, Info, LayoutDashboard, Lock, LogIn, LogOut, Menu, Settings, UserRound, X } from 'lucide-react';
+import { Activity, BarChart3, BookOpen, Cpu, FileUp, Grape, History, House, Info, LayoutDashboard, Lock, LogIn, LogOut, Menu, Settings, UserRound, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -35,7 +35,6 @@ const APP_ITEMS: NavItem[] = [
   { to: '/classificacao', label: 'Classificação', icon: Grape, area: 'classificacao' },
   { to: '/historico', label: 'Histórico', icon: History, area: 'historico' },
   { to: '/importacao', label: 'Importação', icon: FileUp, area: 'importacao' },
-  { to: '/clientes', label: 'Clientes', icon: Globe2, area: 'clientes' },
 ];
 
 export function Navbar() {

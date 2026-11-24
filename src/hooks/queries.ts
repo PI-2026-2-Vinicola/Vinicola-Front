@@ -49,10 +49,7 @@ export const useUsers = () => useQuery({ queryKey: ['users'], queryFn: api.listU
 
 export const useOrganizations = () => useQuery({ queryKey: ['organizations'], queryFn: api.listOrganizations });
 
-export const useClients = (enabled = true) => useQuery({ queryKey: ['clients'], queryFn: api.listClients, enabled });
 
-/** Cliente com os dados sensíveis decifrados (cada consulta fica registrada na auditoria da API). */
-export const useClient = (id: number | null) => useQuery({ queryKey: ['client', id], queryFn: () => api.getClient(id as number), enabled: id != null, staleTime: 0, gcTime: 0 });
 
 export const usePermissionMatrix = () => useQuery({ queryKey: ['permission-matrix'], queryFn: api.getPermissionMatrix, staleTime: 10 * 60_000 });
 

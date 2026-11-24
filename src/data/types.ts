@@ -8,7 +8,7 @@ export type SensorStatus = 'online' | 'atencao' | 'offline' | 'inativo';
 export type Maturation = 'desenvolvimento' | 'pintor' | 'maturacao' | 'adequada' | 'sobrematuracao' | 'nao_informada';
 export type Classification = 'APROVADA' | 'EM OBSERVAÇÃO' | 'REVISÃO NECESSÁRIA';
 export type PipelineStage = 'recebida' | 'processando' | 'analisando' | 'concluida';
-export type Role = 'admin' | 'gestor' | 'operador' | 'cliente';
+export type Role = 'admin' | 'gestor' | 'operador';
 export type ReadingSource = 'sensor' | 'upload' | 'importacao' | 'demonstracao';
 export type ImportKind = 'readings' | 'sensors' | 'environment';
 
@@ -145,8 +145,6 @@ export interface User {
   /** Organização (exportadora) do usuário; null para o administrador da plataforma. */
   organizationId: number | null;
   organizationName: string | null;
-  /** Cliente internacional ligado ao perfil cliente. */
-  clientId: number | null;
   isActive: boolean;
   createdAt: string;
   lastLoginAt: string | null;
@@ -155,7 +153,7 @@ export interface User {
   permissions?: Record<string, string>;
 }
 
-/* ------------------------------------------------------------------ organizações e clientes internacionais */
+/* ------------------------------------------------------------------ organizações */
 export interface Organization {
   id: number;
   name: string;
@@ -163,38 +161,7 @@ export interface Organization {
   active: boolean;
   users: number;
   sensors: number;
-  clients: number;
   createdAt: string;
-}
-
-/** Cliente internacional. Na listagem os campos sensíveis vêm mascarados (masked); no detalhe, decifrados pela API. */
-export interface InternationalClient {
-  id: number;
-  organizationId: number;
-  organizationName: string | null;
-  companyName: string;
-  country: string;
-  contactName: string | null;
-  email: string | null;
-  phone: string | null;
-  taxId: string | null;
-  commercialTerms: string | null;
-  masked: boolean;
-  protectedFields: string[];
-  active: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ClientInput {
-  companyName: string;
-  country: string;
-  contactName?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  taxId?: string | null;
-  commercialTerms?: string | null;
-  organizationId?: number | null;
 }
 
 /* ------------------------------------------------------------------ indicadores */

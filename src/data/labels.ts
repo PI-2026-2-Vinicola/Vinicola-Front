@@ -53,14 +53,12 @@ export const ROLE_LABEL: Record<Role, string> = {
   admin: 'Administrador',
   gestor: 'Exportadora (gestor)',
   operador: 'Operador de campo e logística',
-  cliente: 'Cliente internacional',
 };
 
 export const ROLE_DESCRIPTION: Record<Role, string> = {
   admin: 'Plataforma inteira: usuários, organizações, todos os dados, auditoria e configurações',
-  gestor: 'Dados da própria exportadora: sensores, análises, clima, importação e clientes internacionais',
+  gestor: 'Dados da própria exportadora: sensores, análises, clima e importação',
   operador: 'Dados da própria exportadora: envio de imagens, análises, histórico e clima',
-  cliente: 'Consulta da qualidade e do clima da exportadora contratada e do próprio cadastro',
 };
 
 export const SOURCE_LABEL: Record<ReadingSource, string> = {
@@ -98,10 +96,6 @@ export const AUDIT_ACTION_LABEL: Record<string, string> = {
   importacao_falhou: 'Importação recusada',
   leitura_excluida: 'Leitura excluída',
   acesso_negado: 'Acesso negado',
-  dados_sensiveis_consultados: 'Dados sensíveis consultados',
-  cliente_criado: 'Cliente internacional cadastrado',
-  cliente_alterado: 'Cliente internacional alterado',
-  cliente_excluido: 'Cliente internacional excluído',
   organizacao_criada: 'Organização cadastrada',
   organizacao_alterada: 'Organização alterada',
   organizacao_excluida: 'Organização excluída',

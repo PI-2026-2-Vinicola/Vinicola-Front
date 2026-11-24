@@ -135,9 +135,9 @@ export default function About() {
             <DocSection id="arquitetura" letter="B" title="Arquitetura da aplicação">
               <ArchitectureMap status={s} />
               <p>
-                A API concentra as regras de negócio e a autorização: os perfis <code>admin</code>, <code>gestor</code>, <code>operador</code> e <code>cliente</code> são
+                A API concentra as regras de negócio e a autorização: os perfis <code>admin</code>, <code>gestor</code> e <code>operador</code> são
                 verificados no servidor em cada rota, por uma matriz de permissões única, e cada exportadora só acessa os próprios dados. O contrato JSON usa camelCase e é o mesmo tipado no frontend (<code>src/data/types.ts</code>). As leituras, sensores, medições ambientais,
-                importações, os clientes internacionais e a auditoria ficam no banco relacional; as imagens, em disco ou num bucket S3 privado.
+                importações e a auditoria ficam no banco relacional; as imagens, em disco ou num bucket S3 privado.
               </p>
             </DocSection>
 
@@ -313,8 +313,7 @@ export default function About() {
                   registrados na auditoria, bloqueio após tentativas de login e token individual por dispositivo (guardado como hash).
                 </li>
                 <li>
-                  <strong>Dados protegidos:</strong> senhas com hash PBKDF2-SHA256 e sal; dados pessoais e comerciais dos clientes internacionais cifrados no banco com
-                  AES-256-GCM, decifrados só pela API para os perfis autorizados.
+                  <strong>Senhas:</strong> guardadas só como hash PBKDF2-SHA256 com sal aleatório por usuário.
                 </li>
                 <li>
                   <strong>Entradas:</strong> validação dos dados recebidos, limite de tamanho e decodificação real das imagens, remoção de metadados, consultas parametrizadas e
