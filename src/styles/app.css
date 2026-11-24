@@ -1355,20 +1355,6 @@ tr.is-muted td {
   border-color: #c4e6d2;
 }
 
-/* valores sensíveis mascarados (o original fica cifrado no banco) */
-.protected-value {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-700);
-}
-
-.protected-value svg {
-  color: var(--wine-500);
-  flex: none;
-}
-
 /* matriz de permissões (Administração → Perfis e permissões) */
 .rbac-matrix td,
 .rbac-matrix th {

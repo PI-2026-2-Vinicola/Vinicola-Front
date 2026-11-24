@@ -17,7 +17,6 @@ const AREA_BY_PATH: Record<string, Area> = {
   historico: 'historico',
   importacao: 'importacao',
   administracao: 'administracao',
-  clientes: 'clientes',
   monitoramento: 'monitoramento',
 };
 
@@ -69,7 +68,7 @@ export default function Login() {
           <p>Sensores, imagens analisadas e indicadores de qualidade das uvas em um só lugar.</p>
           <ul className="login-perks">
             <li>
-              <ShieldCheck /> Perfis: Administrador, Exportadora, Operador e Cliente internacional, cada um só com os dados da própria organização
+              <ShieldCheck /> Perfis: Administrador, Exportadora e Operador, cada um só com os dados da própria organização
             </li>
             <li>
               <KeyRound /> Sessão com expiração e bloqueio após tentativas inválidas

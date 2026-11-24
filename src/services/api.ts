@@ -2,7 +2,6 @@ import type {
   AnalysisModel,
   AuditEntry,
   Bucket,
-  ClientInput,
   EnvironmentDay,
   EnvironmentPoint,
   Group,
@@ -10,7 +9,6 @@ import type {
   ImportKind,
   ImportPreview,
   IntegrationsStatus,
-  InternationalClient,
   Organization,
   Page,
   PublicOverview,
@@ -63,11 +61,11 @@ export const changePassword = (currentPassword: string, newPassword: string) =>
 
 /* ------------------------------------------------------------------ usuários */
 export const listUsers = () => http<User[]>('/users');
-export const createUser = (data: { name: string; email: string; role: Role; password: string; organizationId?: number | null; clientId?: number | null }) =>
+export const createUser = (data: { name: string; email: string; role: Role; password: string; organizationId?: number | null }) =>
   http<User>('/users', { method: 'POST', body: data });
 export const updateUser = (
   id: number,
-  data: Partial<{ name: string; role: Role; isActive: boolean; password: string; organizationId: number | null; clientId: number | null }>,
+  data: Partial<{ name: string; role: Role; isActive: boolean; password: string; organizationId: number | null }>,
 ) =>
   http<User>(`/users/${id}`, { method: 'PATCH', body: data });
 
@@ -132,15 +130,9 @@ export const downloadTemplate = (kind: ImportKind) => download(`/imports/templat
 /* ------------------------------------------------------------------ administração */
 export const getSystemStatus = () => http<SystemStatus>('/system/status');
 
-/* ------------------------------------------------------------------ organizações e clientes internacionais */
+/* ------------------------------------------------------------------ organizações */
 export const listOrganizations = () => http<Organization[]>('/organizations');
 export const createOrganization = (data: { name: string; city?: string | null }) => http<Organization>('/organizations', { method: 'POST', body: data });
-export const listClients = () => http<InternationalClient[]>('/clients');
-/** Detalhe com os campos sensíveis decifrados pela API (a consulta fica registrada na auditoria). */
-export const getClient = (id: number) => http<InternationalClient>(`/clients/${id}`);
-export const createClient = (data: ClientInput) => http<InternationalClient>('/clients', { method: 'POST', body: data });
-export const updateClient = (id: number, data: Partial<ClientInput> & { active?: boolean }) => http<InternationalClient>(`/clients/${id}`, { method: 'PATCH', body: data });
-export const deleteClient = (id: number) => http<void>(`/clients/${id}`, { method: 'DELETE' });
 
 export interface PermissionMatrix {
   roles: { id: Role; label: string }[];
@@ -165,8 +157,6 @@ export const AREA_RULE = {
   historico: ['leituras', 'R'],
   importacao: ['importacoes', 'C'],
   administracao: ['usuarios', 'R'],
-  clientes: ['clientes', 'R'],
-  gerenciarClientes: ['clientes', 'C'],
   gerenciarSensores: ['sensores', 'C'],
   excluirLeituras: ['leituras', 'D'],
   medicoesManuais: ['medicoes', 'C'],

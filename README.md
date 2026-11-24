@@ -48,9 +48,8 @@ O frontend é publicado na **Vercel** (PaaS: build e CDN global com HTTPS gerenc
 
 - **Autorização no servidor.** A interface lê as permissões do usuário em `/auth/me` (`canAccess` em `src/services/api.ts`) só para mostrar ou esconder menus; a API recusa com 403 qualquer operação fora da matriz, mesmo chamada direto.
 - **Sessão.** O token JWT vai no cabeçalho `Authorization`; uma resposta 401 (token expirado, inválido ou usuário desativado) leva de volta ao login, e **Sair** apaga o token.
-- **Dados sensíveis.** Na tela de clientes internacionais, contato, e-mail, telefone, identificação fiscal e condições comerciais chegam mascarados na lista; o valor completo só é pedido em **Ver dados**, que a API decifra e registra na auditoria.
 - **Cabeçalhos** (`vercel.json`): Content-Security-Policy (scripts só do próprio site, sem `eval` nem script inline; a página não pode ser embutida em outro site), `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` e `Permissions-Policy`. HTTPS é obrigatório na Vercel.
-- Controles completos (matriz RBAC, criptografia, segredos e testes): [`Vinicola-back/docs/seguranca.md`](https://github.com/PI-2026-2-Vinicola/Vinicola-back/blob/main/docs/seguranca.md).
+- Controles completos (matriz RBAC, isolamento, senhas, segredos e testes): [`Vinicola-back/docs/seguranca.md`](https://github.com/PI-2026-2-Vinicola/Vinicola-back/blob/main/docs/seguranca.md).
 
 ## Páginas
 
@@ -69,11 +68,10 @@ O frontend é publicado na **Vercel** (PaaS: build e CDN global com HTTPS gerenc
 | `/classificacao` | todos | Resultado por variedade (quantidade, % por classificação, confiança), filtro por tipo e período, evolução e maturação |
 | `/historico`, `/historico/:id` | todos | Histórico paginado no servidor com filtros combináveis (período, sensor, bloco, variedade, qualidade, classificação, maturação, origem, busca), ordenação, exportação CSV, detalhe e exclusão (admin e gestor) |
 | `/importacao` | admin, gestor | Importação de leituras, sensores e medições (CSV, Excel, JSON) com pré-visualização validada pelo servidor, tratamento de duplicados e histórico de importações |
-| `/clientes` | admin, gestor, cliente | Clientes internacionais: lista com os dados sensíveis mascarados, **Ver dados** decifrado pela API (consulta auditada), cadastro e edição (admin e gestor); o cliente internacional vê só o próprio cadastro |
 | `/administracao` | admin | Usuários e perfis, organizações (exportadoras), matriz de permissões, estado do sistema, auditoria e integração de dispositivos |
 | `/conta` | todos | Dados do usuário e troca de senha |
 
-Perfis: administrador, gestor (exportadora), operador (campo e logística) e cliente internacional. Cada um vê só os dados da própria exportadora. As permissões vêm da API (`/auth/me`), que aplica a mesma matriz em todas as rotas; esconder um menu aqui é conveniência, o bloqueio real é no servidor.
+Perfis: administrador, gestor (exportadora) e operador (campo e logística). Cada um vê só os dados da própria exportadora. As permissões vêm da API (`/auth/me`), que aplica a mesma matriz em todas as rotas; esconder um menu aqui é conveniência, o bloqueio real é no servidor.
 
 ## Estrutura
 
